@@ -3,6 +3,7 @@ export interface Employee {
   name: string;
   cnic: string;
   department: string;
+  category: 'Skilled' | 'Unskilled';
   basicSalary: number;
   workingDays: number;
   calculatedSalary?: number;

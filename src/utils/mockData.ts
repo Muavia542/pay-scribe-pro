@@ -7,9 +7,10 @@ export const mockEmployees: Employee[] = [
     name: `SOD Employee ${i + 1}`,
     cnic: `42101-${String(1000000 + i).substring(1)}-1`,
     department: "SOD",
-    basicSalary: 28000 + Math.floor(Math.random() * 7000),
+    category: i < 8 ? 'Skilled' : 'Unskilled' as 'Skilled' | 'Unskilled',
+    basicSalary: 36000 + Math.floor(Math.random() * 8000) - 4000, // 32000-40000
     workingDays: 26,
-    calculatedSalary: (28000 + Math.floor(Math.random() * 7000)) * 26,
+    calculatedSalary: (36000 + Math.floor(Math.random() * 8000) - 4000) * 26,
     createdAt: new Date("2024-01-15"),
     updatedAt: new Date("2024-01-15"),
   })),
@@ -20,9 +21,10 @@ export const mockEmployees: Employee[] = [
     name: `BS Employee ${i + 1}`,
     cnic: `42101-${String(2000000 + i).substring(1)}-2`,
     department: "BS",
-    basicSalary: 32000 + Math.floor(Math.random() * 8000),
+    category: i < 12 ? 'Skilled' : 'Unskilled' as 'Skilled' | 'Unskilled',
+    basicSalary: 36000 + Math.floor(Math.random() * 10000) - 5000, // 31000-41000
     workingDays: 26,
-    calculatedSalary: (32000 + Math.floor(Math.random() * 8000)) * 26,
+    calculatedSalary: (36000 + Math.floor(Math.random() * 10000) - 5000) * 26,
     createdAt: new Date("2024-01-20"),
     updatedAt: new Date("2024-01-20"),
   })),
@@ -33,9 +35,10 @@ export const mockEmployees: Employee[] = [
     name: `Area-1 Worker ${i + 1}`,
     cnic: `42101-${String(3000000 + i).substring(1)}-3`,
     department: "Production Area-1",
-    basicSalary: 25000 + Math.floor(Math.random() * 5000),
+    category: i < 6 ? 'Skilled' : 'Unskilled' as 'Skilled' | 'Unskilled',
+    basicSalary: 36000 + Math.floor(Math.random() * 6000) - 3000, // 33000-39000
     workingDays: 26,
-    calculatedSalary: (25000 + Math.floor(Math.random() * 5000)) * 26,
+    calculatedSalary: (36000 + Math.floor(Math.random() * 6000) - 3000) * 26,
     createdAt: new Date("2024-02-01"),
     updatedAt: new Date("2024-02-01"),
   })),
@@ -46,9 +49,10 @@ export const mockEmployees: Employee[] = [
     name: `Area-2 Worker ${i + 1}`,
     cnic: `42101-${String(4000000 + i).substring(1)}-4`,
     department: "Production Area-2",
-    basicSalary: 25000 + Math.floor(Math.random() * 5000),
+    category: i < 7 ? 'Skilled' : 'Unskilled' as 'Skilled' | 'Unskilled',
+    basicSalary: 36000 + Math.floor(Math.random() * 6000) - 3000, // 33000-39000
     workingDays: 26,
-    calculatedSalary: (25000 + Math.floor(Math.random() * 5000)) * 26,
+    calculatedSalary: (36000 + Math.floor(Math.random() * 6000) - 3000) * 26,
     createdAt: new Date("2024-02-05"),
     updatedAt: new Date("2024-02-05"),
   })),
@@ -59,24 +63,12 @@ export const mockEmployees: Employee[] = [
     name: `Process Worker ${i + 1}`,
     cnic: `42101-${String(5000000 + i).substring(1)}-5`,
     department: "Production Process",
-    basicSalary: 27000 + Math.floor(Math.random() * 6000),
+    category: i < 8 ? 'Skilled' : 'Unskilled' as 'Skilled' | 'Unskilled',
+    basicSalary: 36000 + Math.floor(Math.random() * 8000) - 4000, // 32000-40000
     workingDays: 26,
-    calculatedSalary: (27000 + Math.floor(Math.random() * 6000)) * 26,
+    calculatedSalary: (36000 + Math.floor(Math.random() * 8000) - 4000) * 26,
     createdAt: new Date("2024-02-10"),
     updatedAt: new Date("2024-02-10"),
-  })),
-  
-  // Production Inspection (13 employees)
-  ...Array.from({ length: 13 }, (_, i) => ({
-    id: `inspection-${i + 1}`,
-    name: `Inspection Worker ${i + 1}`,
-    cnic: `42101-${String(6000000 + i).substring(1)}-6`,
-    department: "Production Inspection",
-    basicSalary: 29000 + Math.floor(Math.random() * 6000),
-    workingDays: 26,
-    calculatedSalary: (29000 + Math.floor(Math.random() * 6000)) * 26,
-    createdAt: new Date("2024-02-15"),
-    updatedAt: new Date("2024-02-15"),
   })),
 ];
 
@@ -86,7 +78,7 @@ export const mockDepartments: Department[] = [
     name: "SOD",
     description: "Store Operations Department - Managing inventory and supplies",
     employeeCount: 16,
-    totalSalary: 16 * 28000 * 26, // Average calculation
+    totalSalary: 16 * 36000 * 26, // Average calculation
     createdAt: new Date("2024-01-01"),
   },
   {
@@ -94,7 +86,7 @@ export const mockDepartments: Department[] = [
     name: "BS",
     description: "Business Services - Administrative and support functions",
     employeeCount: 18,
-    totalSalary: 18 * 32000 * 26, // Average calculation
+    totalSalary: 18 * 36000 * 26, // Average calculation
     createdAt: new Date("2024-01-01"),
   },
   {
@@ -102,7 +94,7 @@ export const mockDepartments: Department[] = [
     name: "Production Area-1",
     description: "Manufacturing operations in production area 1",
     employeeCount: 13,
-    totalSalary: 13 * 25000 * 26, // Average calculation
+    totalSalary: 13 * 36000 * 26, // Average calculation
     createdAt: new Date("2024-01-01"),
   },
   {
@@ -110,7 +102,7 @@ export const mockDepartments: Department[] = [
     name: "Production Area-2", 
     description: "Manufacturing operations in production area 2",
     employeeCount: 13,
-    totalSalary: 13 * 25000 * 26, // Average calculation
+    totalSalary: 13 * 36000 * 26, // Average calculation
     createdAt: new Date("2024-01-01"),
   },
   {
@@ -118,15 +110,7 @@ export const mockDepartments: Department[] = [
     name: "Production Process",
     description: "Process control and manufacturing workflows",
     employeeCount: 13,
-    totalSalary: 13 * 27000 * 26, // Average calculation
-    createdAt: new Date("2024-01-01"),
-  },
-  {
-    id: "6",
-    name: "Production Inspection",
-    description: "Quality control and product inspection",
-    employeeCount: 13,
-    totalSalary: 13 * 29000 * 26, // Average calculation
+    totalSalary: 13 * 36000 * 26, // Average calculation
     createdAt: new Date("2024-01-01"),
   },
 ];

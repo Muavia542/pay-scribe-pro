@@ -19,6 +19,7 @@ const Employees = () => {
     name: "",
     cnic: "",
     department: "",
+    category: "",
     basicSalary: "",
     workingDays: "",
   });
@@ -32,7 +33,7 @@ const Employees = () => {
 
   const handleAddEmployee = () => {
     if (!newEmployee.name || !newEmployee.cnic || !newEmployee.department || 
-        !newEmployee.basicSalary || !newEmployee.workingDays) {
+        !newEmployee.category || !newEmployee.basicSalary || !newEmployee.workingDays) {
       return;
     }
 
@@ -44,6 +45,7 @@ const Employees = () => {
       name: newEmployee.name,
       cnic: newEmployee.cnic,
       department: newEmployee.department,
+      category: newEmployee.category as 'Skilled' | 'Unskilled',
       basicSalary,
       workingDays,
       calculatedSalary: basicSalary * workingDays,
@@ -56,6 +58,7 @@ const Employees = () => {
       name: "",
       cnic: "",
       department: "",
+      category: "",
       basicSalary: "",
       workingDays: "",
     });
@@ -120,13 +123,25 @@ const Employees = () => {
                 </Select>
               </div>
               <div>
+                <Label htmlFor="category">Category</Label>
+                <Select onValueChange={(value) => setNewEmployee({ ...newEmployee, category: value })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Skilled">Skilled</SelectItem>
+                    <SelectItem value="Unskilled">Unskilled</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
                 <Label htmlFor="basicSalary">Basic Salary (PKR)</Label>
                 <Input
                   id="basicSalary"
                   type="number"
                   value={newEmployee.basicSalary}
                   onChange={(e) => setNewEmployee({ ...newEmployee, basicSalary: e.target.value })}
-                  placeholder="25000"
+                  placeholder="36000"
                 />
               </div>
               <div>
@@ -191,6 +206,7 @@ const Employees = () => {
                 <TableHead>Name</TableHead>
                 <TableHead>CNIC</TableHead>
                 <TableHead>Department</TableHead>
+                <TableHead>Category</TableHead>
                 <TableHead>Basic Salary</TableHead>
                 <TableHead>Working Days</TableHead>
                 <TableHead>Total Salary</TableHead>
@@ -203,6 +219,15 @@ const Employees = () => {
                   <TableCell className="font-medium">{employee.name}</TableCell>
                   <TableCell>{employee.cnic}</TableCell>
                   <TableCell>{employee.department}</TableCell>
+                  <TableCell>
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      employee.category === 'Skilled' 
+                        ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300' 
+                        : 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300'
+                    }`}>
+                      {employee.category}
+                    </span>
+                  </TableCell>
                   <TableCell>PKR {employee.basicSalary.toLocaleString()}</TableCell>
                   <TableCell>{employee.workingDays}</TableCell>
                   <TableCell className="font-medium text-success">
