@@ -14,7 +14,214 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      departments: {
+        Row: {
+          created_at: string
+          description: string | null
+          employee_count: number | null
+          id: string
+          name: string
+          total_salary: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          employee_count?: number | null
+          id?: string
+          name: string
+          total_salary?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          employee_count?: number | null
+          id?: string
+          name?: string
+          total_salary?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      employees: {
+        Row: {
+          basic_salary: number
+          calculated_salary: number | null
+          category: string
+          cnic: string
+          created_at: string
+          department: string
+          id: string
+          name: string
+          updated_at: string
+          working_days: number
+        }
+        Insert: {
+          basic_salary: number
+          calculated_salary?: number | null
+          category: string
+          cnic: string
+          created_at?: string
+          department: string
+          id?: string
+          name: string
+          updated_at?: string
+          working_days?: number
+        }
+        Update: {
+          basic_salary?: number
+          calculated_salary?: number | null
+          category?: string
+          cnic?: string
+          created_at?: string
+          department?: string
+          id?: string
+          name?: string
+          updated_at?: string
+          working_days?: number
+        }
+        Relationships: []
+      }
+      invoice_line_items: {
+        Row: {
+          amount: number
+          attendance: number | null
+          created_at: string
+          description: string
+          id: string
+          invoice_id: string
+          pob: number | null
+          rate: number | null
+        }
+        Insert: {
+          amount: number
+          attendance?: number | null
+          created_at?: string
+          description: string
+          id?: string
+          invoice_id: string
+          pob?: number | null
+          rate?: number | null
+        }
+        Update: {
+          amount?: number
+          attendance?: number | null
+          created_at?: string
+          description?: string
+          id?: string
+          invoice_id?: string
+          pob?: number | null
+          rate?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_line_items_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoices: {
+        Row: {
+          contract_number: string | null
+          department: string
+          eobi_amount: number
+          generated_at: string
+          gst_amount: number
+          gst_rate: number
+          id: string
+          invoice_number: string
+          month: string
+          service_description: string | null
+          service_fee: number
+          sub_total: number
+          total_amount: number
+          year: number
+        }
+        Insert: {
+          contract_number?: string | null
+          department: string
+          eobi_amount?: number
+          generated_at?: string
+          gst_amount?: number
+          gst_rate?: number
+          id?: string
+          invoice_number: string
+          month: string
+          service_description?: string | null
+          service_fee?: number
+          sub_total?: number
+          total_amount?: number
+          year: number
+        }
+        Update: {
+          contract_number?: string | null
+          department?: string
+          eobi_amount?: number
+          generated_at?: string
+          gst_amount?: number
+          gst_rate?: number
+          id?: string
+          invoice_number?: string
+          month?: string
+          service_description?: string | null
+          service_fee?: number
+          sub_total?: number
+          total_amount?: number
+          year?: number
+        }
+        Relationships: []
+      }
+      payroll_entries: {
+        Row: {
+          basic_salary: number
+          calculated_salary: number
+          created_at: string
+          department: string
+          employee_id: string
+          employee_name: string
+          id: string
+          month: string
+          working_days: number
+          year: number
+        }
+        Insert: {
+          basic_salary: number
+          calculated_salary: number
+          created_at?: string
+          department: string
+          employee_id: string
+          employee_name: string
+          id?: string
+          month: string
+          working_days: number
+          year: number
+        }
+        Update: {
+          basic_salary?: number
+          calculated_salary?: number
+          created_at?: string
+          department?: string
+          employee_id?: string
+          employee_name?: string
+          id?: string
+          month?: string
+          working_days?: number
+          year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payroll_entries_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
