@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Users, Building, Calculator, FileText, BarChart3, Upload } from "lucide-react";
+import { Users, Building, Calculator, FileText, BarChart3, Upload, Receipt } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface LayoutProps {
@@ -13,6 +13,7 @@ const navigation = [
   { name: "Departments", href: "/departments", icon: Building },
   { name: "Payroll", href: "/payroll", icon: Calculator },
   { name: "Invoices", href: "/invoices", icon: FileText },
+  { name: "KPK Invoice", href: "/kpk-invoice", icon: Receipt },
   { name: "Import Data", href: "/import", icon: Upload },
 ];
 

@@ -1,72 +1,175 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Plus, Search, Edit, Trash2 } from "lucide-react";
-import { mockEmployees, mockDepartments } from "@/utils/mockData";
+import { Trash2, Plus, Search } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 import { Employee } from "@/types/employee";
 
 const Employees = () => {
-  const [employees, setEmployees] = useState<Employee[]>(mockEmployees);
+  const [employees, setEmployees] = useState<Employee[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedDepartment, setSelectedDepartment] = useState("all");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [newEmployee, setNewEmployee] = useState({
     name: "",
     cnic: "",
     department: "",
-    category: "",
+    category: "Skilled" as "Skilled" | "Unskilled",
     basicSalary: "",
-    workingDays: "",
+    workingDays: "26"
   });
+  const { toast } = useToast();
 
-  const filteredEmployees = employees.filter((employee) => {
-    const matchesSearch = employee.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         employee.cnic.includes(searchTerm);
-    const matchesDepartment = selectedDepartment === "all" || employee.department === selectedDepartment;
+  // Fetch employees from database
+  useEffect(() => {
+    fetchEmployees();
+  }, []);
+
+  const fetchEmployees = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('employees')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      const transformedEmployees: Employee[] = data.map(emp => ({
+        id: emp.id,
+        name: emp.name,
+        cnic: emp.cnic,
+        department: emp.department,
+        category: emp.category as 'Skilled' | 'Unskilled',
+        basicSalary: Number(emp.basic_salary),
+        workingDays: emp.working_days,
+        calculatedSalary: Number(emp.calculated_salary),
+        createdAt: new Date(emp.created_at),
+        updatedAt: new Date(emp.updated_at)
+      }));
+
+      setEmployees(transformedEmployees);
+    } catch (error) {
+      console.error('Error fetching employees:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load employees",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Filter employees based on search term and selected department
+  const filteredEmployees = employees.filter(emp => {
+    const matchesSearch = emp.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         emp.cnic.includes(searchTerm);
+    const matchesDepartment = selectedDepartment === "all" || emp.department === selectedDepartment;
     return matchesSearch && matchesDepartment;
   });
 
-  const handleAddEmployee = () => {
-    if (!newEmployee.name || !newEmployee.cnic || !newEmployee.department || 
-        !newEmployee.category || !newEmployee.basicSalary || !newEmployee.workingDays) {
+  const handleAddEmployee = async () => {
+    if (!newEmployee.name || !newEmployee.cnic || !newEmployee.department || !newEmployee.basicSalary) {
+      toast({
+        title: "Error",
+        description: "Please fill in all required fields",
+        variant: "destructive",
+      });
       return;
     }
 
     const basicSalary = parseFloat(newEmployee.basicSalary);
     const workingDays = parseInt(newEmployee.workingDays);
     
-    const employee: Employee = {
-      id: (employees.length + 1).toString(),
-      name: newEmployee.name,
-      cnic: newEmployee.cnic,
-      department: newEmployee.department,
-      category: newEmployee.category as 'Skilled' | 'Unskilled',
-      basicSalary,
-      workingDays,
-      calculatedSalary: basicSalary * workingDays,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
+    if (isNaN(basicSalary) || basicSalary <= 0) {
+      toast({
+        title: "Error",
+        description: "Please enter a valid basic salary",
+        variant: "destructive",
+      });
+      return;
+    }
 
-    setEmployees([...employees, employee]);
-    setNewEmployee({
-      name: "",
-      cnic: "",
-      department: "",
-      category: "",
-      basicSalary: "",
-      workingDays: "",
-    });
-    setIsAddDialogOpen(false);
+    if (isNaN(workingDays) || workingDays <= 0) {
+      toast({
+        title: "Error",
+        description: "Please enter valid working days",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('employees')
+        .insert({
+          name: newEmployee.name,
+          cnic: newEmployee.cnic,
+          department: newEmployee.department,
+          category: newEmployee.category,
+          basic_salary: basicSalary,
+          working_days: workingDays
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Employee added successfully",
+      });
+
+      setNewEmployee({
+        name: "",
+        cnic: "",
+        department: "",
+        category: "Skilled",
+        basicSalary: "",
+        workingDays: "26"
+      });
+      setIsAddDialogOpen(false);
+      fetchEmployees(); // Refresh the list
+
+    } catch (error: any) {
+      console.error('Error adding employee:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to add employee",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleDeleteEmployee = (id: string) => {
-    setEmployees(employees.filter(emp => emp.id !== id));
+  const handleDeleteEmployee = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('employees')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Employee deleted successfully",
+      });
+
+      fetchEmployees(); // Refresh the list
+
+    } catch (error: any) {
+      console.error('Error deleting employee:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete employee",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -109,22 +212,22 @@ const Employees = () => {
               </div>
               <div>
                 <Label htmlFor="department">Department</Label>
-                <Select onValueChange={(value) => setNewEmployee({ ...newEmployee, department: value })}>
+                <Select value={newEmployee.department} onValueChange={(value) => setNewEmployee({...newEmployee, department: value})}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select department" />
                   </SelectTrigger>
                   <SelectContent>
-                    {mockDepartments.map((dept) => (
-                      <SelectItem key={dept.id} value={dept.name}>
-                        {dept.name}
-                      </SelectItem>
-                    ))}
+                    <SelectItem value="SOD">SOD</SelectItem>
+                    <SelectItem value="BS">BS</SelectItem>
+                    <SelectItem value="Production Area-1">Production Area-1</SelectItem>
+                    <SelectItem value="Production Area-2">Production Area-2</SelectItem>
+                    <SelectItem value="Production Process">Production Process</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div>
                 <Label htmlFor="category">Category</Label>
-                <Select onValueChange={(value) => setNewEmployee({ ...newEmployee, category: value })}>
+                <Select value={newEmployee.category} onValueChange={(value) => setNewEmployee({ ...newEmployee, category: value as "Skilled" | "Unskilled" })}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select category" />
                   </SelectTrigger>
@@ -178,16 +281,16 @@ const Employees = () => {
               </div>
             </div>
             <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
-              <SelectTrigger className="w-48">
-                <SelectValue placeholder="Filter by department" />
+              <SelectTrigger className="w-[200px]">
+                <SelectValue placeholder="All Departments" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Departments</SelectItem>
-                {mockDepartments.map((dept) => (
-                  <SelectItem key={dept.id} value={dept.name}>
-                    {dept.name}
-                  </SelectItem>
-                ))}
+                <SelectItem value="SOD">SOD</SelectItem>
+                <SelectItem value="BS">BS</SelectItem>
+                <SelectItem value="Production Area-1">Production Area-1</SelectItem>
+                <SelectItem value="Production Area-2">Production Area-2</SelectItem>
+                <SelectItem value="Production Process">Production Process</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -214,41 +317,43 @@ const Employees = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredEmployees.map((employee) => (
-                <TableRow key={employee.id}>
-                  <TableCell className="font-medium">{employee.name}</TableCell>
-                  <TableCell>{employee.cnic}</TableCell>
-                  <TableCell>{employee.department}</TableCell>
-                  <TableCell>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      employee.category === 'Skilled' 
-                        ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300' 
-                        : 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300'
-                    }`}>
-                      {employee.category}
-                    </span>
-                  </TableCell>
-                  <TableCell>PKR {employee.basicSalary.toLocaleString()}</TableCell>
-                  <TableCell>{employee.workingDays}</TableCell>
-                  <TableCell className="font-medium text-success">
-                    PKR {employee.calculatedSalary?.toLocaleString()}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex gap-2">
-                      <Button variant="outline" size="sm">
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => handleDeleteEmployee(employee.id)}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
+              {loading ? (
+                <TableRow>
+                  <TableCell colSpan={8} className="text-center py-8">
+                    Loading employees...
                   </TableCell>
                 </TableRow>
-              ))}
+              ) : filteredEmployees.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={8} className="text-center py-8">
+                    No employees found
+                  </TableCell>
+                </TableRow>
+              ) : (
+                filteredEmployees.map((employee) => (
+                  <TableRow key={employee.id}>
+                    <TableCell className="font-medium">{employee.name}</TableCell>
+                    <TableCell>{employee.cnic}</TableCell>
+                    <TableCell>{employee.department}</TableCell>
+                    <TableCell>{employee.category}</TableCell>
+                    <TableCell>{employee.basicSalary.toLocaleString()}</TableCell>
+                    <TableCell>{employee.workingDays}</TableCell>
+                    <TableCell>{employee.calculatedSalary?.toLocaleString()}</TableCell>
+                    <TableCell>
+                      <div className="flex gap-2">
+                        <Button variant="outline" size="sm">Edit</Button>
+                        <Button 
+                          variant="destructive" 
+                          size="sm"
+                          onClick={() => handleDeleteEmployee(employee.id)}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </CardContent>

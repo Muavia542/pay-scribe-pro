@@ -9,6 +9,7 @@ import Departments from "./pages/Departments";
 import Payroll from "./pages/Payroll";
 import Invoices from "./pages/Invoices";
 import ImportData from "./pages/ImportData";
+import KPKInvoice from "./pages/KPKInvoice";
 import NotFound from "./pages/NotFound";
 import Layout from "./components/Layout";
 
@@ -28,6 +29,7 @@ const App = () => (
             <Route path="/payroll" element={<Payroll />} />
             <Route path="/invoices" element={<Invoices />} />
             <Route path="/import" element={<ImportData />} />
+            <Route path="/kpk-invoice" element={<KPKInvoice />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Layout>
