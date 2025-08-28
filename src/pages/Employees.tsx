@@ -6,15 +6,19 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Trash2, Plus, Search } from "lucide-react";
+import { Trash2, Plus, Search, Download, Edit2 } from "lucide-react";
+import { DatePicker } from "@/components/ui/date-picker";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Employee } from "@/types/employee";
+import { generateEmployeesPDF } from "@/utils/pdfGenerator";
+import { format } from "date-fns";
 
 const Employees = () => {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedDepartment, setSelectedDepartment] = useState("all");
+  const [selectedDate, setSelectedDate] = useState<Date>();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [newEmployee, setNewEmployee] = useState({
@@ -240,6 +244,16 @@ const Employees = () => {
     }
   };
 
+  const handleDownloadPDF = () => {
+    const month = selectedDate ? format(selectedDate, "MMMM") : "Current";
+    const year = selectedDate ? format(selectedDate, "yyyy") : new Date().getFullYear().toString();
+    generateEmployeesPDF(filteredEmployees, month, year);
+    toast({
+      title: "PDF Generated",
+      description: "Employee report has been downloaded successfully.",
+    });
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -248,7 +262,23 @@ const Employees = () => {
           <h1 className="text-3xl font-bold text-foreground">Employees</h1>
           <p className="text-muted-foreground mt-1">Manage your workforce and employee details</p>
         </div>
-        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+        <div className="flex gap-3">
+          <div className="flex gap-2 items-end">
+            <div>
+              <Label className="text-sm font-medium">Report Month</Label>
+              <DatePicker
+                value={selectedDate}
+                onChange={setSelectedDate}
+                placeholder="Select month"
+                className="w-48"
+              />
+            </div>
+            <Button variant="outline" onClick={handleDownloadPDF}>
+              <Download className="w-4 h-4 mr-2" />
+              Download PDF
+            </Button>
+          </div>
+          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogTrigger asChild>
             <Button>
               <Plus className="w-4 h-4 mr-2" />
@@ -329,8 +359,9 @@ const Employees = () => {
                 Add Employee
               </Button>
             </div>
-          </DialogContent>
-        </Dialog>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
       {/* Edit Dialog */}

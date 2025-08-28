@@ -3,12 +3,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Download, Calculator, FileSpreadsheet } from "lucide-react";
+import { Download, Calculator, FileSpreadsheet, CalendarIcon } from "lucide-react";
+import { DatePicker } from "@/components/ui/date-picker";
 import { mockEmployees, mockDepartments } from "@/utils/mockData";
+import { format } from "date-fns";
 
 const Payroll = () => {
   const [selectedDepartment, setSelectedDepartment] = useState("all");
-  const [selectedMonth, setSelectedMonth] = useState("current");
+  const [selectedDate, setSelectedDate] = useState<Date>();
 
   const filteredEmployees = selectedDepartment === "all" 
     ? mockEmployees 
@@ -70,18 +72,13 @@ const Payroll = () => {
                 </Select>
               </div>
               <div>
-                <label className="text-sm font-medium mb-2 block">Month</label>
-                <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="current">Current Month</SelectItem>
-                    <SelectItem value="last">Last Month</SelectItem>
-                    <SelectItem value="january">January 2024</SelectItem>
-                    <SelectItem value="february">February 2024</SelectItem>
-                  </SelectContent>
-                </Select>
+                <label className="text-sm font-medium mb-2 block">Month & Year</label>
+                <DatePicker
+                  value={selectedDate}
+                  onChange={setSelectedDate}
+                  placeholder="Select month and year"
+                  className="w-full"
+                />
               </div>
             </div>
           </CardContent>
@@ -121,6 +118,7 @@ const Payroll = () => {
         <CardHeader>
           <CardTitle>
             Salary Calculation - {selectedDepartment === "all" ? "All Departments" : selectedDepartment}
+            {selectedDate && ` - ${format(selectedDate, "MMMM yyyy")}`}
           </CardTitle>
         </CardHeader>
         <CardContent>
