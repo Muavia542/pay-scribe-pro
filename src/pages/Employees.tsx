@@ -25,6 +25,16 @@ const Employees = () => {
     basicSalary: "",
     workingDays: "26"
   });
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editEmployee, setEditEmployee] = useState<{
+    id: string;
+    name: string;
+    cnic: string;
+    department: string;
+    category: "Skilled" | "Unskilled";
+    basicSalary: string;
+    workingDays: string;
+  } | null>(null);
   const { toast } = useToast();
 
   // Fetch employees from database
@@ -172,6 +182,64 @@ const Employees = () => {
     }
   };
 
+  const openEditDialog = (emp: Employee) => {
+    setEditEmployee({
+      id: emp.id,
+      name: emp.name,
+      cnic: emp.cnic,
+      department: emp.department,
+      category: emp.category,
+      basicSalary: String(emp.basicSalary),
+      workingDays: String(emp.workingDays),
+    });
+    setIsEditDialogOpen(true);
+  };
+
+  const handleUpdateEmployee = async () => {
+    if (!editEmployee) return;
+
+    if (!editEmployee.name || !editEmployee.cnic || !editEmployee.department || !editEmployee.basicSalary) {
+      toast({ title: "Error", description: "Please fill in all required fields", variant: "destructive" });
+      return;
+    }
+
+    const basicSalary = parseFloat(editEmployee.basicSalary);
+    const workingDays = parseInt(editEmployee.workingDays);
+
+    if (isNaN(basicSalary) || basicSalary <= 0) {
+      toast({ title: "Error", description: "Please enter a valid basic salary", variant: "destructive" });
+      return;
+    }
+    if (isNaN(workingDays) || workingDays <= 0) {
+      toast({ title: "Error", description: "Please enter valid working days", variant: "destructive" });
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('employees')
+        .update({
+          name: editEmployee.name,
+          cnic: editEmployee.cnic,
+          department: editEmployee.department,
+          category: editEmployee.category,
+          basic_salary: basicSalary,
+          working_days: workingDays,
+        })
+        .eq('id', editEmployee.id);
+
+      if (error) throw error;
+
+      toast({ title: "Success", description: "Employee updated successfully" });
+      setIsEditDialogOpen(false);
+      setEditEmployee(null);
+      fetchEmployees();
+    } catch (error: any) {
+      console.error('Error updating employee:', error);
+      toast({ title: "Error", description: error.message || "Failed to update employee", variant: "destructive" });
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -265,6 +333,87 @@ const Employees = () => {
         </Dialog>
       </div>
 
+      {/* Edit Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={(open) => { setIsEditDialogOpen(open); if (!open) setEditEmployee(null); }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Edit Employee</DialogTitle>
+          </DialogHeader>
+          {editEmployee && (
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="edit-name">Full Name</Label>
+                <Input
+                  id="edit-name"
+                  value={editEmployee.name}
+                  onChange={(e) => setEditEmployee({ ...editEmployee, name: e.target.value })}
+                  placeholder="Enter employee name"
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit-cnic">CNIC</Label>
+                <Input
+                  id="edit-cnic"
+                  value={editEmployee.cnic}
+                  onChange={(e) => setEditEmployee({ ...editEmployee, cnic: e.target.value })}
+                  placeholder="42101-1234567-1"
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit-department">Department</Label>
+                <Select value={editEmployee.department} onValueChange={(value) => setEditEmployee({ ...editEmployee, department: value })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select department" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="SOD">SOD</SelectItem>
+                    <SelectItem value="BS">BS</SelectItem>
+                    <SelectItem value="Production Area-1">Production Area-1</SelectItem>
+                    <SelectItem value="Production Area-2">Production Area-2</SelectItem>
+                    <SelectItem value="Production Process">Production Process</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="edit-category">Category</Label>
+                <Select value={editEmployee.category} onValueChange={(value) => setEditEmployee({ ...editEmployee, category: value as "Skilled" | "Unskilled" })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Skilled">Skilled</SelectItem>
+                    <SelectItem value="Unskilled">Unskilled</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="edit-basicSalary">Basic Salary (PKR)</Label>
+                <Input
+                  id="edit-basicSalary"
+                  type="number"
+                  value={editEmployee.basicSalary}
+                  onChange={(e) => setEditEmployee({ ...editEmployee, basicSalary: e.target.value })}
+                  placeholder="36000"
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit-workingDays">Working Days</Label>
+                <Input
+                  id="edit-workingDays"
+                  type="number"
+                  value={editEmployee.workingDays}
+                  onChange={(e) => setEditEmployee({ ...editEmployee, workingDays: e.target.value })}
+                  placeholder="26"
+                />
+              </div>
+              <Button onClick={handleUpdateEmployee} className="w-full">
+                Save Changes
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
       {/* Filters */}
       <Card className="shadow-soft">
         <CardContent className="p-6">
@@ -341,7 +490,7 @@ const Employees = () => {
                     <TableCell>{employee.calculatedSalary?.toLocaleString()}</TableCell>
                     <TableCell>
                       <div className="flex gap-2">
-                        <Button variant="outline" size="sm">Edit</Button>
+                        <Button variant="outline" size="sm" onClick={() => openEditDialog(employee)}>Edit</Button>
                         <Button 
                           variant="destructive" 
                           size="sm"
