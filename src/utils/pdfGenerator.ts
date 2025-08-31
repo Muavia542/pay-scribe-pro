@@ -14,12 +14,15 @@ export const generateEmployeesPDF = (employees: Employee[], month: string, year:
   
   // Add table headers
   doc.setFontSize(10);
-  const headers = ['Name', 'CNIC', 'Department', 'Category', 'Basic Salary', 'Working Days', 'Calculated Salary'];
+  const headers = ['Name', 'Department', 'Category', 'Working Days', 'Total Salary', 'Signature'];
+  const colWidths = [35, 30, 25, 20, 25, 30]; // Adjusted column widths
   let y = 50;
   
   // Header row
+  let x = 10;
   headers.forEach((header, index) => {
-    doc.text(header, 10 + (index * 28), y);
+    doc.text(header, x, y);
+    x += colWidths[index];
   });
   
   y += 10;
@@ -29,20 +32,28 @@ export const generateEmployeesPDF = (employees: Employee[], month: string, year:
     if (y > 280) { // New page if needed
       doc.addPage();
       y = 20;
+      // Repeat headers on new page
+      x = 10;
+      headers.forEach((header, index) => {
+        doc.text(header, x, y);
+        x += colWidths[index];
+      });
+      y += 10;
     }
     
     const rowData = [
-      employee.name.substring(0, 12),
-      employee.cnic.substring(0, 15),
-      employee.department.substring(0, 10),
+      employee.name.substring(0, 18),
+      employee.department.substring(0, 15),
       employee.category,
-      `PKR ${employee.basicSalary.toLocaleString()}`,
       employee.workingDays.toString(),
-      `PKR ${(employee.calculatedSalary || 0).toLocaleString()}`
+      `PKR ${(employee.calculatedSalary || 0).toLocaleString()}`,
+      '' // Signature field left blank for manual signing
     ];
     
+    x = 10;
     rowData.forEach((data, colIndex) => {
-      doc.text(data, 10 + (colIndex * 28), y);
+      doc.text(data, x, y);
+      x += colWidths[colIndex];
     });
     
     y += 8;

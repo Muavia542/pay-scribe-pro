@@ -319,7 +319,7 @@ const Employees = () => {
                     <SelectItem value="BS">BS</SelectItem>
                     <SelectItem value="Production Area-1">Production Area-1</SelectItem>
                     <SelectItem value="Production Area-2">Production Area-2</SelectItem>
-                    <SelectItem value="Production Process">Production Process</SelectItem>
+                     <SelectItem value="Process & Inspection">Process & Inspection</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -401,7 +401,7 @@ const Employees = () => {
                     <SelectItem value="BS">BS</SelectItem>
                     <SelectItem value="Production Area-1">Production Area-1</SelectItem>
                     <SelectItem value="Production Area-2">Production Area-2</SelectItem>
-                    <SelectItem value="Production Process">Production Process</SelectItem>
+                     <SelectItem value="Process & Inspection">Process & Inspection</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -470,7 +470,7 @@ const Employees = () => {
                 <SelectItem value="BS">BS</SelectItem>
                 <SelectItem value="Production Area-1">Production Area-1</SelectItem>
                 <SelectItem value="Production Area-2">Production Area-2</SelectItem>
-                <SelectItem value="Production Process">Production Process</SelectItem>
+                <SelectItem value="Process & Inspection">Process & Inspection</SelectItem>
               </SelectContent>
             </Select>
           </div>

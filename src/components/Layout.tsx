@@ -1,8 +1,10 @@
 import { ReactNode, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Users, Building, Calculator, FileText, BarChart3, Upload, Receipt, Menu, X } from "lucide-react";
+import { Users, Building, Calculator, FileText, BarChart3, Upload, Receipt, Menu, X, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useAuth } from "@/hooks/useAuth";
+import { Button } from "@/components/ui/button";
 
 interface LayoutProps {
   children: ReactNode;
@@ -22,6 +24,7 @@ const Layout = ({ children }: LayoutProps) => {
   const location = useLocation();
   const isMobile = useIsMobile();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { signOut } = useAuth();
 
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);
@@ -34,7 +37,7 @@ const Layout = ({ children }: LayoutProps) => {
         <p className="text-sm text-muted-foreground mt-1">Employee Management</p>
       </div>
       
-      <nav className="px-4 pb-4">
+      <nav className="px-4 pb-4 flex-1">
         {navigation.map((item) => {
           const Icon = item.icon;
           const isActive = location.pathname === item.href;
@@ -57,6 +60,17 @@ const Layout = ({ children }: LayoutProps) => {
           );
         })}
       </nav>
+      
+      <div className="px-4 pb-4">
+        <Button
+          variant="outline"
+          onClick={signOut}
+          className="w-full flex items-center gap-2"
+        >
+          <LogOut size={18} />
+          Sign Out
+        </Button>
+      </div>
     </>
   );
 

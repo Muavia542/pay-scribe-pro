@@ -52,7 +52,7 @@ const KPKInvoice = () => {
   // Calculate totals
   const subTotal = lineItems.reduce((sum, item) => sum + item.amount, 0);
   const totalWithEobi = subTotal + eobi.amount;
-  const gstAmount = (totalWithEobi * gstRate) / 100;
+  const gstAmount = (subTotal * gstRate) / 100; // Fixed: GST based on Sub Total only
   const finalTotal = totalWithEobi + gstAmount;
 
   const handlePrint = () => {
@@ -201,7 +201,7 @@ const KPKInvoice = () => {
                   <SelectItem value="BS">BS</SelectItem>
                   <SelectItem value="Production Area-1">Production Area-1</SelectItem>
                   <SelectItem value="Production Area-2">Production Area-2</SelectItem>
-                  <SelectItem value="Production Process">Production Process</SelectItem>
+                  <SelectItem value="Process & Inspection">Process & Inspection</SelectItem>
                 </SelectContent>
               </Select>
             </div>

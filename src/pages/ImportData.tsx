@@ -333,7 +333,7 @@ const ImportData = () => {
               <ul className="text-sm text-muted-foreground space-y-1">
                 <li>• <strong>Name:</strong> Employee full name</li>
                 <li>• <strong>CNIC:</strong> National identity card number (format: 42101-1234567-1)</li>
-                <li>• <strong>Department:</strong> Department name (SOD, BS, Production Area-1, Production Area-2, Production Process)</li>
+                <li>• <strong>Department:</strong> Department name (SOD, BS, Production Area-1, Production Area-2, Process & Inspection)</li>
                 <li>• <strong>Category:</strong> Employee category (Skilled or Unskilled)</li>
                 <li>• <strong>Basic Salary:</strong> Monthly basic salary amount (numbers only)</li>
                 <li>• <strong>Working Days:</strong> Number of working days (numbers only)</li>
@@ -395,7 +395,7 @@ const ImportData = () => {
         <CardContent>
           <div className="space-y-2 text-sm text-muted-foreground">
             <p>• Download the template file to ensure proper formatting</p>
-            <p>• Departments must be: SOD, BS, Production Area-1, Production Area-2, or Production Process</p>
+            <p>• Departments must be: SOD, BS, Production Area-1, Production Area-2, or Process & Inspection</p>
             <p>• Category must be either 'Skilled' or 'Unskilled' (case sensitive)</p>
             <p>• Verify CNIC numbers are in the correct format: 12345-1234567-1</p>
             <p>• Check that salary and working days are valid numbers</p>

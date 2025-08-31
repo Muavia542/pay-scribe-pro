@@ -74,7 +74,7 @@ export const mockEmployees: Employee[] = [
     };
   }),
   
-  // Production Process (13 employees)
+  // Process & Inspection (13 employees)
   ...Array.from({ length: 13 }, (_, i) => {
     const basicSalary = 36000 + Math.floor(Math.random() * 8000) - 4000;
     const workingDays = 26;
@@ -82,7 +82,7 @@ export const mockEmployees: Employee[] = [
       id: `process-${i + 1}`,
       name: `Process Worker ${i + 1}`,
       cnic: `42101-${String(5000000 + i).substring(1)}-5`,
-      department: "Production Process",
+      department: "Process & Inspection",
       category: i < 8 ? 'Skilled' : 'Unskilled' as 'Skilled' | 'Unskilled',
       basicSalary,
       workingDays,
@@ -128,10 +128,10 @@ export const mockDepartments: Department[] = [
   },
   {
     id: "5",
-    name: "Production Process",
+    name: "Process & Inspection",
     description: "Process control and manufacturing workflows",
     employeeCount: 13,
-    totalSalary: mockEmployees.filter(emp => emp.department === "Production Process").reduce((sum, emp) => sum + (emp.calculatedSalary || 0), 0),
+    totalSalary: mockEmployees.filter(emp => emp.department === "Process & Inspection").reduce((sum, emp) => sum + (emp.calculatedSalary || 0), 0),
     createdAt: new Date("2024-01-01"),
   },
 ];
