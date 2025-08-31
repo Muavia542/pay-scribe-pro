@@ -134,7 +134,7 @@ const KPKInvoice = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">KPK Sales Tax Invoice</h1>
+          <h1 className="text-3xl font-bold text-foreground">Generate Invoice</h1>
           <p className="text-muted-foreground mt-1">Generate professional sales tax invoices</p>
         </div>
         <div className="flex gap-2">
@@ -223,7 +223,7 @@ const KPKInvoice = () => {
           <div ref={printRef}>
             {/* Header */}
             <div className="text-center mb-8">
-              <h1 className="text-2xl font-bold mb-2">KPK SALES TAX INVOICE</h1>
+              <h2 className="text-2xl font-bold text-primary mb-2">TAHIRA CONSTRUCTION & SERVICES</h2>
               <p className="text-lg font-semibold">Invoice #{invoiceData.invoiceNumber}</p>
             </div>
 
