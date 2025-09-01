@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,9 +6,12 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Printer, FileText } from "lucide-react";
+import { Printer, FileText, Eye, Trash2 } from "lucide-react";
+import { roundInvoiceAmount } from "@/utils/pdfGenerator";
+import logoImage from "@/assets/tahira-logo.png";
 
 const KPKInvoice = () => {
   const [invoiceData, setInvoiceData] = useState({
@@ -22,38 +25,72 @@ const KPKInvoice = () => {
     department: "BS"
   });
 
-  const [lineItems, setLineItems] = useState([
-    {
-      description: "Unskilled Labors",
+  // New input fields as requested
+  const [serviceFee, setServiceFee] = useState(139840);
+  const [skilledAttendance, setSkilledAttendance] = useState(0);
+  const [unskilledAttendance, setUnskilledAttendance] = useState(286);
+  const [pob, setPob] = useState(13);
+
+  const [gstRate, setGstRate] = useState(15);
+  const [savedInvoices, setSavedInvoices] = useState<any[]>([]);
+  const { toast } = useToast();
+  const printRef = useRef<HTMLDivElement>(null);
+
+  // Calculate line items based on inputs
+  const lineItems = [
+    ...(skilledAttendance > 0 ? [{
+      description: "Skilled Labors",
+      rate: 2624.00,
+      attendance: skilledAttendance,
+      pob: null,
+      amount: 2624.00 * skilledAttendance
+    }] : []),
+    ...(unskilledAttendance > 0 ? [{
+      description: "Unskilled Labors", 
       rate: 1636.36,
-      attendance: 286,
-      pob: 13,
-      amount: 467998.96
-    },
+      attendance: unskilledAttendance,
+      pob: null,
+      amount: 1636.36 * unskilledAttendance
+    }] : []),
     {
       description: "Service Fee",
       rate: null,
       attendance: null,
       pob: null,
-      amount: 139840
+      amount: serviceFee
     }
-  ]);
+  ];
 
-  const [eobi, setEobi] = useState({
+  const eobi = {
     rate: 2220,
-    pob: 13,
-    amount: 28860
-  });
+    pob: pob,
+    amount: Math.round((pob / 22) * 2220.00)
+  };
 
-  const [gstRate, setGstRate] = useState(15);
-  const { toast } = useToast();
-  const printRef = useRef<HTMLDivElement>(null);
-
-  // Calculate totals
+  // Calculate totals with custom rounding
   const subTotal = lineItems.reduce((sum, item) => sum + item.amount, 0);
   const totalWithEobi = subTotal + eobi.amount;
-  const gstAmount = (subTotal * gstRate) / 100; // Fixed: GST based on Sub Total only
-  const finalTotal = totalWithEobi + gstAmount;
+  const gstAmount = (subTotal * gstRate) / 100; // GST based on Sub Total only
+  const finalTotal = roundInvoiceAmount(totalWithEobi + gstAmount); // Apply custom rounding
+
+  // Fetch saved invoices
+  useEffect(() => {
+    fetchSavedInvoices();
+  }, []);
+
+  const fetchSavedInvoices = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('invoices')
+        .select('*')
+        .order('generated_at', { ascending: false });
+
+      if (error) throw error;
+      setSavedInvoices(data || []);
+    } catch (error: any) {
+      console.error('Error fetching invoices:', error);
+    }
+  };
 
   const handlePrint = () => {
     if (printRef.current) {
@@ -76,10 +113,11 @@ const KPKInvoice = () => {
                 .amount { text-align: right; }
                 .total-row { font-weight: bold; }
                 .final-total { font-size: 18px; font-weight: bold; background-color: #f0f0f0; }
-                @media print {
-                  body { margin: 0; }
-                  .no-print { display: none; }
-                }
+                 @media print {
+                   body { margin: 0; }
+                   .no-print { display: none; }
+                   @page { size: A4; margin: 0.5in; }
+                 }
               </style>
             </head>
             <body>
@@ -105,7 +143,7 @@ const KPKInvoice = () => {
           contract_number: invoiceData.contractNumber,
           service_description: invoiceData.service,
           sub_total: subTotal,
-          service_fee: lineItems.find(item => item.description === "Service Fee")?.amount || 0,
+          service_fee: serviceFee,
           eobi_amount: eobi.amount,
           gst_rate: gstRate,
           gst_amount: gstAmount,
@@ -119,11 +157,39 @@ const KPKInvoice = () => {
         description: "Invoice saved successfully",
       });
 
+      // Refresh the saved invoices list
+      fetchSavedInvoices();
+
     } catch (error: any) {
       console.error('Error saving invoice:', error);
       toast({
         title: "Error",
         description: error.message || "Failed to save invoice",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const deleteInvoice = async (invoiceId: string) => {
+    try {
+      const { error } = await supabase
+        .from('invoices')
+        .delete()
+        .eq('id', invoiceId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Invoice deleted successfully",
+      });
+
+      fetchSavedInvoices();
+    } catch (error: any) {
+      console.error('Error deleting invoice:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete invoice",
         variant: "destructive",
       });
     }
@@ -206,6 +272,50 @@ const KPKInvoice = () => {
               </Select>
             </div>
           </div>
+          
+          {/* New Input Fields */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="serviceFee">Service Fee (PKR)</Label>
+              <Input
+                id="serviceFee"
+                type="number"
+                value={serviceFee}
+                onChange={(e) => setServiceFee(Number(e.target.value))}
+              />
+            </div>
+            <div>
+              <Label htmlFor="pob">POB (Number of Employees)</Label>
+              <Input
+                id="pob"
+                type="number"
+                value={pob}
+                onChange={(e) => setPob(Number(e.target.value))}
+              />
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="skilledAttendance">Skilled Labors Attendance</Label>
+              <Input
+                id="skilledAttendance"
+                type="number"
+                value={skilledAttendance}
+                onChange={(e) => setSkilledAttendance(Number(e.target.value))}
+              />
+            </div>
+            <div>
+              <Label htmlFor="unskilledAttendance">Unskilled Labors Attendance</Label>
+              <Input
+                id="unskilledAttendance"
+                type="number"
+                value={unskilledAttendance}
+                onChange={(e) => setUnskilledAttendance(Number(e.target.value))}
+              />
+            </div>
+          </div>
+
           <div>
             <Label htmlFor="service">Service Description</Label>
             <Input
@@ -222,16 +332,10 @@ const KPKInvoice = () => {
         <CardContent className="p-8">
           <div ref={printRef}>
             {/* Header */}
-            <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-4">
-                <div className="flex flex-col items-center">
-                  <div className="w-16 h-16 bg-red-600 flex items-center justify-center">
-                    <div className="w-12 h-12 border-4 border-white transform rotate-45"></div>
-                  </div>
-                  <span className="text-xs font-bold text-red-600 mt-1">LOGO</span>
-                </div>
+                <img src={logoImage} alt="Company Logo" className="w-16 h-16 object-contain" />
                 <div>
-                  <h2 className="text-2xl font-bold text-primary">TAHIRA CONSTRUCTION & SERVICES</h2>
                   <p className="text-lg font-semibold">Invoice #{invoiceData.invoiceNumber}</p>
                 </div>
               </div>
@@ -336,30 +440,63 @@ const KPKInvoice = () => {
             </Table>
 
             {/* Footer */}
-            <div className="mt-8 text-sm text-gray-600">
-              <Separator className="mb-4" />
-              <div className="text-center mb-4">
-                <p>This is a computer-generated invoice and requires no signature.</p>
-              </div>
-              <div className="border-t pt-4">
-                <h4 className="font-bold text-lg mb-2 text-primary">TAHIRA CONSTRUCTION & SERVICES</h4>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-left">
-                  <div>
-                    <p className="font-medium">Address:</p>
-                    <p>VPO Makori Tehsil Banda Daud Shah District Karak</p>
-                  </div>
-                  <div>
-                    <p className="font-medium">Email:</p>
-                    <p>mshamidkhattak@gmail.com</p>
-                  </div>
-                  <div>
-                    <p className="font-medium">Contact No:</p>
-                    <p>03155157591</p>
-                  </div>
+            <div className="mt-6 text-sm text-gray-600 border-t pt-4">
+              <div className="flex justify-between items-center">
+                <div>
+                  <span className="font-medium">Address: </span>
+                  <span>VPO Makori Tehsil Banda Daud Shah District Karak</span>
+                </div>
+                <div>
+                  <span className="font-medium">Email: </span>
+                  <span>mshamidkhattak@gmail.com</span>
+                </div>
+                <div>
+                  <span className="font-medium">Contact No: </span>
+                  <span>03155157591</span>
                 </div>
               </div>
             </div>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Saved Invoices Section */}
+      <Card className="shadow-soft">
+        <CardHeader>
+          <CardTitle>Saved Invoices</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {savedInvoices.length === 0 ? (
+            <p className="text-muted-foreground text-center py-4">No invoices saved yet</p>
+          ) : (
+            <div className="space-y-2">
+              {savedInvoices.map((invoice) => (
+                <div
+                  key={invoice.id}
+                  className="flex items-center justify-between p-4 border rounded-lg"
+                >
+                  <div className="flex-1">
+                    <h3 className="font-medium">{invoice.invoice_number}</h3>
+                    <p className="text-sm text-muted-foreground">
+                      {invoice.department} • {invoice.month} {invoice.year} • PKR {invoice.total_amount?.toLocaleString()}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="secondary">
+                      {new Date(invoice.generated_at).toLocaleDateString()}
+                    </Badge>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => deleteInvoice(invoice.id)}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
