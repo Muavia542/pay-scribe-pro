@@ -6,7 +6,7 @@ export const invoiceCalculations = {
   skilledLaborsAmount: (attendance: number): number => 2624.00 * attendance,
   unskilledLaborsAmount: (attendance: number): number => 1636.36 * attendance,
   eobiAmount: (attendance: number): number => Math.round((attendance / 22) * 2220.00),
-  gstAmount: (totalSum: number): number => totalSum * 0.15,
+  gstAmount: (subTotal: number): number => subTotal * 0.15,
   
   calculateInvoiceTotal: (serviceFee: number, skilledAttendance: number, unskilledAttendance: number) => {
     const skilledAmount = invoiceCalculations.skilledLaborsAmount(skilledAttendance);
@@ -14,7 +14,7 @@ export const invoiceCalculations = {
     const subTotal = serviceFee + skilledAmount + unskilledAmount;
     const eobiAmount = invoiceCalculations.eobiAmount(skilledAttendance + unskilledAttendance);
     const totalSum = subTotal + eobiAmount;
-    const gstAmount = invoiceCalculations.gstAmount(totalSum);
+    const gstAmount = invoiceCalculations.gstAmount(subTotal); // Fixed: GST calculated on subTotal only
     const totalAmount = totalSum + gstAmount;
     
     return {

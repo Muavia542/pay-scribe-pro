@@ -15,8 +15,9 @@ const navigation = [
   { name: "Employees", href: "/employees", icon: Users },
   { name: "Departments", href: "/departments", icon: Building },
   { name: "Payroll", href: "/payroll", icon: Calculator },
-  { name: "Invoices", href: "/invoices", icon: FileText },
+  { name: "Invoice Management", href: "/invoices", icon: FileText },
   { name: "Generate Invoice", href: "/kpk-invoice", icon: Receipt },
+  { name: "Saved Invoices", href: "/saved-invoices", icon: FileText },
   { name: "Import Data", href: "/import", icon: Upload },
 ];
 

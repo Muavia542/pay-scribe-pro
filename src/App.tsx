@@ -9,6 +9,7 @@ import Employees from "./pages/Employees";
 import Departments from "./pages/Departments";
 import Payroll from "./pages/Payroll";
 import InvoicesNew from "./pages/InvoicesNew";
+import SavedInvoices from "./pages/SavedInvoices";
 import ImportData from "./pages/ImportData";
 import KPKInvoice from "./pages/KPKInvoice";
 import Auth from "./pages/Auth";
@@ -87,6 +88,13 @@ const AppRoutes = () => {
         <ProtectedRoute>
           <Layout>
             <KPKInvoice />
+          </Layout>
+        </ProtectedRoute>
+      } />
+      <Route path="/saved-invoices" element={
+        <ProtectedRoute>
+          <Layout>
+            <SavedInvoices />
           </Layout>
         </ProtectedRoute>
       } />

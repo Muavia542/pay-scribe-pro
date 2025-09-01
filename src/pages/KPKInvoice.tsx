@@ -222,9 +222,19 @@ const KPKInvoice = () => {
         <CardContent className="p-8">
           <div ref={printRef}>
             {/* Header */}
-            <div className="text-center mb-8">
-              <h2 className="text-2xl font-bold text-primary mb-2">TAHIRA CONSTRUCTION & SERVICES</h2>
-              <p className="text-lg font-semibold">Invoice #{invoiceData.invoiceNumber}</p>
+            <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center gap-4">
+                <div className="flex flex-col items-center">
+                  <div className="w-16 h-16 bg-red-600 flex items-center justify-center">
+                    <div className="w-12 h-12 border-4 border-white transform rotate-45"></div>
+                  </div>
+                  <span className="text-xs font-bold text-red-600 mt-1">LOGO</span>
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-primary">TAHIRA CONSTRUCTION & SERVICES</h2>
+                  <p className="text-lg font-semibold">Invoice #{invoiceData.invoiceNumber}</p>
+                </div>
+              </div>
             </div>
 
             {/* Bill To Section */}
@@ -326,9 +336,28 @@ const KPKInvoice = () => {
             </Table>
 
             {/* Footer */}
-            <div className="mt-8 text-center text-sm text-gray-600">
+            <div className="mt-8 text-sm text-gray-600">
               <Separator className="mb-4" />
-              <p>This is a computer-generated invoice and requires no signature.</p>
+              <div className="text-center mb-4">
+                <p>This is a computer-generated invoice and requires no signature.</p>
+              </div>
+              <div className="border-t pt-4">
+                <h4 className="font-bold text-lg mb-2 text-primary">TAHIRA CONSTRUCTION & SERVICES</h4>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-left">
+                  <div>
+                    <p className="font-medium">Address:</p>
+                    <p>VPO Makori Tehsil Banda Daud Shah District Karak</p>
+                  </div>
+                  <div>
+                    <p className="font-medium">Email:</p>
+                    <p>mshamidkhattak@gmail.com</p>
+                  </div>
+                  <div>
+                    <p className="font-medium">Contact No:</p>
+                    <p>03155157591</p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </CardContent>
