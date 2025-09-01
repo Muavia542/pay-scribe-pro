@@ -2,6 +2,18 @@ export const calculateSalary = (basicSalary: number, workingDays: number): numbe
   return Math.round((basicSalary / 22) * workingDays);
 };
 
+// Custom rounding function for invoice amounts
+const roundInvoiceAmount = (amount: number): number => {
+  const decimal = amount - Math.floor(amount);
+  if (decimal > 0.60) {
+    return Math.ceil(amount);
+  } else if (decimal < 0.50) {
+    return Math.floor(amount);
+  } else {
+    return Math.round(amount);
+  }
+};
+
 export const invoiceCalculations = {
   skilledLaborsAmount: (attendance: number): number => 2624.00 * attendance,
   unskilledLaborsAmount: (attendance: number): number => 1636.36 * attendance,
@@ -15,7 +27,7 @@ export const invoiceCalculations = {
     const eobiAmount = invoiceCalculations.eobiAmount(skilledAttendance + unskilledAttendance);
     const totalSum = subTotal + eobiAmount;
     const gstAmount = invoiceCalculations.gstAmount(subTotal); // Fixed: GST calculated on subTotal only
-    const totalAmount = totalSum + gstAmount;
+    const totalAmount = roundInvoiceAmount(totalSum + gstAmount); // Apply custom rounding
     
     return {
       skilledAmount,
