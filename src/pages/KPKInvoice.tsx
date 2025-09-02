@@ -7,20 +7,22 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
+import { DatePicker } from "@/components/ui/date-picker";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Printer, FileText, Eye, Trash2 } from "lucide-react";
 import { roundInvoiceAmount } from "@/utils/pdfGenerator";
+import { format } from "date-fns";
 // Removed missing logo import; using public asset path
 
 const KPKInvoice = () => {
   const [invoiceData, setInvoiceData] = useState({
     invoiceNumber: "TCS-335",
-    date: "13-08-2025",
+    date: new Date(),
     contractNumber: "CON1467/25",
     ntn: "5194834-7",
     kpkGST: "K-5194834-7",
-    month: "July 2025",
+    month: new Date(),
     service: "Provision of Support Services at Loading Operation-1",
     department: "BS"
   });
@@ -64,7 +66,7 @@ const KPKInvoice = () => {
   const eobi = {
     rate: 2220,
     pob: pob,
-    amount: Math.round((pob / 22) * 2220.00)
+    amount: 2220 * pob
   };
 
   // Calculate totals with custom rounding
@@ -138,8 +140,8 @@ const KPKInvoice = () => {
         .insert({
           invoice_number: invoiceData.invoiceNumber,
           department: invoiceData.department,
-          month: invoiceData.month.split(' ')[0],
-          year: parseInt(invoiceData.month.split(' ')[1]),
+          month: format(invoiceData.month, 'MMMM'),
+          year: invoiceData.month.getFullYear(),
           contract_number: invoiceData.contractNumber,
           service_description: invoiceData.service,
           sub_total: subTotal,
@@ -232,10 +234,10 @@ const KPKInvoice = () => {
             </div>
             <div>
               <Label htmlFor="date">Date</Label>
-              <Input
-                id="date"
+              <DatePicker
                 value={invoiceData.date}
-                onChange={(e) => setInvoiceData({...invoiceData, date: e.target.value})}
+                onChange={(date) => setInvoiceData({...invoiceData, date: date || new Date()})}
+                placeholder="Select date"
               />
             </div>
             <div>
@@ -250,10 +252,10 @@ const KPKInvoice = () => {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label htmlFor="month">Invoice For Month</Label>
-              <Input
-                id="month"
+              <DatePicker
                 value={invoiceData.month}
-                onChange={(e) => setInvoiceData({...invoiceData, month: e.target.value})}
+                onChange={(date) => setInvoiceData({...invoiceData, month: date || new Date()})}
+                placeholder="Select month"
               />
             </div>
             <div>
@@ -354,7 +356,7 @@ const KPKInvoice = () => {
               <div>
                 <h3 className="font-bold mb-2">Invoice Details:</h3>
                 <div className="text-sm space-y-1">
-                  <p><span className="font-medium">Date:</span> {invoiceData.date}</p>
+                  <p><span className="font-medium">Date:</span> {format(invoiceData.date, 'dd-MM-yyyy')}</p>
                   <p><span className="font-medium">Contract #:</span> {invoiceData.contractNumber}</p>
                   <p><span className="font-medium">NTN #:</span> {invoiceData.ntn}</p>
                   <p><span className="font-medium">KPK GST #:</span> {invoiceData.kpkGST}</p>
@@ -363,7 +365,7 @@ const KPKInvoice = () => {
               <div>
                 <h3 className="font-bold mb-2">Service Period:</h3>
                 <div className="text-sm space-y-1">
-                  <p><span className="font-medium">Invoice For Month:</span> {invoiceData.month}</p>
+                  <p><span className="font-medium">Invoice For Month:</span> {format(invoiceData.month, 'MMMM yyyy')}</p>
                   <p><span className="font-medium">Service:</span> {invoiceData.service}</p>
                 </div>
               </div>
