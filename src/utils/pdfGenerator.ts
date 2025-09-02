@@ -33,10 +33,10 @@ export const generateEmployeesPDF = (employees: Employee[], month: string, year:
   doc.setFontSize(14);
   doc.text(`${month} ${year}`, 40, 35);
   
-  // Add table headers with Basic Salary column included
+  // Add table headers - removed Basic Salary column as requested
   doc.setFontSize(10);
-  const headers = ['Name', 'Department', 'Basic Salary', 'Working Days', 'Total Salary', 'Signature'];
-  const colWidths = [35, 30, 25, 20, 25, 30]; // Adjusted column widths for better spacing
+  const headers = ['Name', 'Department', 'Working Days', 'Total Salary', 'Signature'];
+  const colWidths = [40, 35, 25, 30, 35]; // Adjusted column widths for better spacing
   let y = 55;
   
   // Header row
@@ -62,12 +62,11 @@ export const generateEmployeesPDF = (employees: Employee[], month: string, year:
       y += 15;
     }
     
-    // Updated: Added Basic Salary column and fixed data mapping
+    // Fixed: Correct data mapping without Basic Salary column
     const rowData = [
-      employee.name.substring(0, 18),
-      employee.department.substring(0, 15),
-      `PKR ${(employee.basicSalary || 0).toLocaleString()}`,
-      employee.workingDays.toString(),
+      employee.name.substring(0, 20),
+      employee.department.substring(0, 18),
+      employee.workingDays?.toString() || '0',
       `PKR ${(employee.calculatedSalary || 0).toLocaleString()}`,
       '' // Signature field left blank for manual signing
     ];

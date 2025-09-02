@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Trash2, Plus, Search, Download, Edit2 } from "lucide-react";
+import { Trash2, Plus, Search, Download, Edit2, ChevronUp, ChevronDown } from "lucide-react";
 import { DatePicker } from "@/components/ui/date-picker";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -19,6 +19,8 @@ const Employees = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedDepartment, setSelectedDepartment] = useState("all");
   const [selectedDate, setSelectedDate] = useState<Date>();
+  const [sortBy, setSortBy] = useState<'name' | 'department' | 'basicSalary' | 'workingDays'>('name');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [newEmployee, setNewEmployee] = useState({
@@ -81,13 +83,54 @@ const Employees = () => {
     }
   };
 
-  // Filter employees based on search term and selected department
-  const filteredEmployees = employees.filter(emp => {
-    const matchesSearch = emp.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         emp.cnic.includes(searchTerm);
-    const matchesDepartment = selectedDepartment === "all" || emp.department === selectedDepartment;
-    return matchesSearch && matchesDepartment;
-  });
+  // Filter and sort employees based on search term, selected department, and sorting preferences
+  const filteredEmployees = employees
+    .filter(emp => {
+      const matchesSearch = emp.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           emp.cnic.includes(searchTerm);
+      const matchesDepartment = selectedDepartment === "all" || emp.department === selectedDepartment;
+      return matchesSearch && matchesDepartment;
+    })
+    .sort((a, b) => {
+      let aValue, bValue;
+      
+      switch (sortBy) {
+        case 'name':
+          aValue = a.name.toLowerCase();
+          bValue = b.name.toLowerCase();
+          break;
+        case 'department':
+          aValue = a.department.toLowerCase();
+          bValue = b.department.toLowerCase();
+          break;
+        case 'basicSalary':
+          aValue = a.basicSalary;
+          bValue = b.basicSalary;
+          break;
+        case 'workingDays':
+          aValue = a.workingDays;
+          bValue = b.workingDays;
+          break;
+        default:
+          aValue = a.name.toLowerCase();
+          bValue = b.name.toLowerCase();
+      }
+      
+      if (sortOrder === 'asc') {
+        return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
+      } else {
+        return aValue > bValue ? -1 : aValue < bValue ? 1 : 0;
+      }
+    });
+
+  const handleSort = (field: 'name' | 'department' | 'basicSalary' | 'workingDays') => {
+    if (sortBy === field) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortBy(field);
+      setSortOrder('asc');
+    }
+  };
 
   const handleAddEmployee = async () => {
     if (!newEmployee.name || !newEmployee.cnic || !newEmployee.department || !newEmployee.basicSalary) {
@@ -486,12 +529,60 @@ const Employees = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Name</TableHead>
+                <TableHead>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => handleSort('name')}
+                    className="h-auto p-0 font-medium hover:bg-transparent"
+                  >
+                    Name
+                    {sortBy === 'name' && (
+                      sortOrder === 'asc' ? <ChevronUp className="ml-1 w-4 h-4" /> : <ChevronDown className="ml-1 w-4 h-4" />
+                    )}
+                  </Button>
+                </TableHead>
                 <TableHead>CNIC</TableHead>
-                <TableHead>Department</TableHead>
+                <TableHead>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => handleSort('department')}
+                    className="h-auto p-0 font-medium hover:bg-transparent"
+                  >
+                    Department
+                    {sortBy === 'department' && (
+                      sortOrder === 'asc' ? <ChevronUp className="ml-1 w-4 h-4" /> : <ChevronDown className="ml-1 w-4 h-4" />
+                    )}
+                  </Button>
+                </TableHead>
                 <TableHead>Category</TableHead>
-                <TableHead>Basic Salary</TableHead>
-                <TableHead>Working Days</TableHead>
+                <TableHead>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => handleSort('basicSalary')}
+                    className="h-auto p-0 font-medium hover:bg-transparent"
+                  >
+                    Basic Salary
+                    {sortBy === 'basicSalary' && (
+                      sortOrder === 'asc' ? <ChevronUp className="ml-1 w-4 h-4" /> : <ChevronDown className="ml-1 w-4 h-4" />
+                    )}
+                  </Button>
+                </TableHead>
+                <TableHead>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => handleSort('workingDays')}
+                    className="h-auto p-0 font-medium hover:bg-transparent"
+                  >
+                    Working Days
+                    {sortBy === 'workingDays' && (
+                      sortOrder === 'asc' ? <ChevronUp className="ml-1 w-4 h-4" /> : <ChevronDown className="ml-1 w-4 h-4" />
+                    )}
+                  </Button>
+                </TableHead>
                 <TableHead>Total Salary</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
