@@ -11,7 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Printer, FileText, Eye, Trash2 } from "lucide-react";
 import { roundInvoiceAmount } from "@/utils/pdfGenerator";
-import logoImage from "@/assets/tahira-logo.png";
+// Removed missing logo import; using public asset path
 
 const KPKInvoice = () => {
   const [invoiceData, setInvoiceData] = useState({
@@ -334,7 +334,7 @@ const KPKInvoice = () => {
             {/* Header */}
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-4">
-                <img src={logoImage} alt="Company Logo" className="w-16 h-16 object-contain" />
+                <img src="/lovable-uploads/3ad6dd25-3db5-4d04-bb8a-fed3dd000209.png" alt="Company logo" className="w-16 h-16 object-contain" loading="eager" />
                 <div>
                   <p className="text-lg font-semibold">Invoice #{invoiceData.invoiceNumber}</p>
                 </div>
