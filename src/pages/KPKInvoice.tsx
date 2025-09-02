@@ -332,13 +332,8 @@ const KPKInvoice = () => {
         <CardContent className="p-8">
           <div ref={printRef}>
             {/* Header */}
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-4">
-                <img src="/lovable-uploads/3ad6dd25-3db5-4d04-bb8a-fed3dd000209.png" alt="Company logo" className="w-16 h-16 object-contain" loading="eager" />
-                <div>
-                  <p className="text-lg font-semibold">Invoice #{invoiceData.invoiceNumber}</p>
-                </div>
-              </div>
+            <div className="mb-6">
+              <p className="text-lg font-semibold">Invoice #{invoiceData.invoiceNumber}</p>
             </div>
 
             {/* Bill To Section */}
