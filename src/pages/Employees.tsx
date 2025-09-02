@@ -62,7 +62,7 @@ const Employees = () => {
         department: emp.department,
         category: emp.category as 'Skilled' | 'Unskilled',
         basicSalary: Number(emp.basic_salary),
-        workingDays: emp.working_days,
+        workingDays: Number(emp.working_days),
         calculatedSalary: Number(emp.calculated_salary),
         createdAt: new Date(emp.created_at),
         updatedAt: new Date(emp.updated_at)
