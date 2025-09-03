@@ -16,46 +16,60 @@ export const roundInvoiceAmount = (amount: number): number => {
 export const generateEmployeesPDF = (employees: Employee[], month: string, year: string, selectedColumns?: any) => {
   const doc = new jsPDF();
   
+  // Add header with light blue background (sky color)
+  doc.setFillColor(135, 206, 235); // Light blue sky color
+  doc.rect(0, 0, 210, 40, 'F'); // Full width header
+  
   // Add logo
   try {
     const logoImg = new Image();
     logoImg.src = '/lovable-uploads/3ad6dd25-3db5-4d04-bb8a-fed3dd000209.png';
-    doc.addImage(logoImg, 'PNG', 10, 10, 20, 20);
+    doc.addImage(logoImg, 'PNG', 10, 5, 30, 30);
   } catch (error) {
     console.warn('Logo could not be added to PDF');
   }
   
-  // Add title
-  doc.setFontSize(20);
-  doc.text('Employee Report', 40, 20);
+  // Add company name in header
+  doc.setTextColor(255, 255, 255); // White text for header
+  doc.setFontSize(22);
+  doc.setFont('helvetica', 'bold');
+  doc.text('Tahira Construction & Services', 50, 20);
+  
+  // Add report title
+  doc.setTextColor(0, 0, 0); // Black text
+  doc.setFontSize(18);
+  doc.setFont('helvetica', 'bold');
+  doc.text('Employee Details Report', 50, 50);
   
   // Add subtitle
   doc.setFontSize(14);
-  doc.text(`${month} ${year}`, 40, 35);
+  doc.setFont('helvetica', 'normal');
+  doc.text(`${month} ${year}`, 50, 65);
   
-  // Determine which columns to include
+  // Determine which columns to include (always include S.No first)
   const columnMapping = {
-    name: { header: 'Name', width: 35 },
-    department: { header: 'Department', width: 30 },
-    cnic: { header: 'CNIC', width: 35 },
-    category: { header: 'Category', width: 25 },
-    basicSalary: { header: 'Basic Salary', width: 30 },
-    workingDays: { header: 'Working Days', width: 25 },
-    totalSalary: { header: 'Total Salary', width: 30 },
-    signature: { header: 'Signature', width: 30 }
+    serialNo: { header: 'S.No', width: 15 },
+    name: { header: 'Name', width: 30 },
+    department: { header: 'Department', width: 25 },
+    cnic: { header: 'CNIC', width: 30 },
+    category: { header: 'Category', width: 20 },
+    basicSalary: { header: 'Basic Salary', width: 25 },
+    workingDays: { header: 'Working Days', width: 20 },
+    totalSalary: { header: 'Total Salary', width: 25 },
+    signature: { header: 'Signature', width: 25 }
   };
 
-  // Use selected columns or default columns
-  const defaultColumns = ['name', 'department', 'workingDays', 'totalSalary', 'signature'];
-  const columnsToShow = selectedColumns 
-    ? Object.keys(selectedColumns).filter(key => selectedColumns[key])
+  // Use selected columns or default columns, always include serial number
+  const defaultColumns = ['serialNo', 'name', 'department', 'workingDays', 'totalSalary', 'signature'];
+  let columnsToShow = selectedColumns 
+    ? ['serialNo', ...Object.keys(selectedColumns).filter(key => selectedColumns[key] && key !== 'serialNo')]
     : defaultColumns;
 
   const headers = columnsToShow.map(col => columnMapping[col as keyof typeof columnMapping].header);
   const colWidths = columnsToShow.map(col => columnMapping[col as keyof typeof columnMapping].width);
   
   doc.setFontSize(10);
-  let y = 55;
+  let y = 80;
   
   // Header row
   let x = 15;
@@ -82,9 +96,10 @@ export const generateEmployeesPDF = (employees: Employee[], month: string, year:
     
     // Create row data based on selected columns
     const dataMapping = {
-      name: employee.name.substring(0, 20),
-      department: employee.department.substring(0, 18),
-      cnic: employee.cnic.substring(0, 15),
+      serialNo: (index + 1).toString(),
+      name: employee.name.substring(0, 18),
+      department: employee.department.substring(0, 15),
+      cnic: employee.cnic.substring(0, 13),
       category: employee.category,
       basicSalary: `PKR ${(employee.basicSalary || 0).toLocaleString()}`,
       workingDays: (employee.workingDays || 0).toString(),
@@ -109,6 +124,25 @@ export const generateEmployeesPDF = (employees: Employee[], month: string, year:
   doc.setFontSize(12);
   doc.text(`Total Employees: ${employees.length}`, 20, y);
   doc.text(`Total Salary: PKR ${totalSalary.toLocaleString()}`, 20, y + 12);
+  
+  // Add footer with light blue background
+  const pageHeight = doc.internal.pageSize.height;
+  doc.setFillColor(135, 206, 235); // Light blue sky color
+  doc.rect(0, pageHeight - 20, 210, 20, 'F'); // Full width footer
+  
+  // Add footer content
+  doc.setTextColor(255, 255, 255); // White text for footer
+  doc.setFontSize(8);
+  doc.setFont('helvetica', 'normal');
+  
+  // Left: Address
+  doc.text('Address: VPO Makori Tehsil Banda Daud Shah District Karak', 10, pageHeight - 10);
+  
+  // Center: Email
+  doc.text('Email: mshamidkhattak@gmail.com', 70, pageHeight - 10);
+  
+  // Right: Contact
+  doc.text('Contact No: 03155157591', 150, pageHeight - 10);
   
   // Save the PDF
   doc.save(`employees-report-${month}-${year}.pdf`);

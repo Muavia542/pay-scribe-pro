@@ -20,7 +20,7 @@ const Employees = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedDepartment, setSelectedDepartment] = useState("all");
   const [selectedDate, setSelectedDate] = useState<Date>();
-  const [sortBy, setSortBy] = useState<'name' | 'department' | 'basicSalary' | 'workingDays'>('department');
+  const [sortBy, setSortBy] = useState<'name' | 'department' | 'basicSalary' | 'workingDays' | 'calculatedSalary'>('department');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [isColumnSelectOpen, setIsColumnSelectOpen] = useState(false);
   const [selectedColumns, setSelectedColumns] = useState({
@@ -104,17 +104,32 @@ const Employees = () => {
       return matchesSearch && matchesDepartment;
     })
     .sort((a, b) => {
-      // Primary sort by department
-      const deptComparison = a.department.toLowerCase().localeCompare(b.department.toLowerCase());
-      if (deptComparison !== 0) {
-        return deptComparison;
+      let comparison = 0;
+      
+      switch (sortBy) {
+        case 'name':
+          comparison = a.name.toLowerCase().localeCompare(b.name.toLowerCase());
+          break;
+        case 'department':
+          comparison = a.department.toLowerCase().localeCompare(b.department.toLowerCase());
+          break;
+        case 'basicSalary':
+          comparison = (a.basicSalary || 0) - (b.basicSalary || 0);
+          break;
+        case 'workingDays':
+          comparison = (a.workingDays || 0) - (b.workingDays || 0);
+          break;
+        case 'calculatedSalary':
+          comparison = (a.calculatedSalary || 0) - (b.calculatedSalary || 0);
+          break;
+        default:
+          comparison = 0;
       }
       
-      // Secondary sort by name within the same department
-      return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
+      return sortOrder === 'asc' ? comparison : -comparison;
     });
 
-  const handleSort = (field: 'name' | 'department' | 'basicSalary' | 'workingDays') => {
+  const handleSort = (field: 'name' | 'department' | 'basicSalary' | 'workingDays' | 'calculatedSalary') => {
     if (sortBy === field) {
       setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
     } else {
@@ -305,10 +320,27 @@ const Employees = () => {
           <p className="text-muted-foreground mt-1">Manage your workforce and employee details</p>
         </div>
         <div className="flex gap-3">
-          <Button variant="outline" onClick={handleSortByDepartmentName}>
-            <ArrowUpDown className="w-4 h-4 mr-2" />
-            Sort by Department & Name
-          </Button>
+          <Select value={`${sortBy}-${sortOrder}`} onValueChange={(value) => {
+            const [field, order] = value.split('-') as [typeof sortBy, typeof sortOrder];
+            setSortBy(field);
+            setSortOrder(order);
+          }}>
+            <SelectTrigger className="w-48">
+              <SelectValue placeholder="Sort employees by..." />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="department-asc">Department (A-Z)</SelectItem>
+              <SelectItem value="department-desc">Department (Z-A)</SelectItem>
+              <SelectItem value="name-asc">Name (A-Z)</SelectItem>
+              <SelectItem value="name-desc">Name (Z-A)</SelectItem>
+              <SelectItem value="basicSalary-asc">Basic Salary (Low to High)</SelectItem>
+              <SelectItem value="basicSalary-desc">Basic Salary (High to Low)</SelectItem>
+              <SelectItem value="workingDays-asc">Working Days (Low to High)</SelectItem>
+              <SelectItem value="workingDays-desc">Working Days (High to Low)</SelectItem>
+              <SelectItem value="calculatedSalary-asc">Total Salary (Low to High)</SelectItem>
+              <SelectItem value="calculatedSalary-desc">Total Salary (High to Low)</SelectItem>
+            </SelectContent>
+          </Select>
           <div className="flex gap-2 items-end">
             <div>
               <Label className="text-sm font-medium">Report Month</Label>
