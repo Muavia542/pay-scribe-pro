@@ -13,7 +13,7 @@ export const roundInvoiceAmount = (amount: number): number => {
   }
 };
 
-export const generateEmployeesPDF = (employees: Employee[], month: string, year: string) => {
+export const generateEmployeesPDF = (employees: Employee[], month: string, year: string, selectedColumns?: any) => {
   const doc = new jsPDF();
   
   // Add logo
@@ -33,10 +33,28 @@ export const generateEmployeesPDF = (employees: Employee[], month: string, year:
   doc.setFontSize(14);
   doc.text(`${month} ${year}`, 40, 35);
   
-  // Add table headers - removed Basic Salary column as requested
+  // Determine which columns to include
+  const columnMapping = {
+    name: { header: 'Name', width: 35 },
+    department: { header: 'Department', width: 30 },
+    cnic: { header: 'CNIC', width: 35 },
+    category: { header: 'Category', width: 25 },
+    basicSalary: { header: 'Basic Salary', width: 30 },
+    workingDays: { header: 'Working Days', width: 25 },
+    totalSalary: { header: 'Total Salary', width: 30 },
+    signature: { header: 'Signature', width: 30 }
+  };
+
+  // Use selected columns or default columns
+  const defaultColumns = ['name', 'department', 'workingDays', 'totalSalary', 'signature'];
+  const columnsToShow = selectedColumns 
+    ? Object.keys(selectedColumns).filter(key => selectedColumns[key])
+    : defaultColumns;
+
+  const headers = columnsToShow.map(col => columnMapping[col as keyof typeof columnMapping].header);
+  const colWidths = columnsToShow.map(col => columnMapping[col as keyof typeof columnMapping].width);
+  
   doc.setFontSize(10);
-  const headers = ['Name', 'Department', 'Working Days', 'Total Salary', 'Signature'];
-  const colWidths = [40, 35, 25, 30, 35]; // Adjusted column widths for better spacing
   let y = 55;
   
   // Header row
@@ -62,14 +80,19 @@ export const generateEmployeesPDF = (employees: Employee[], month: string, year:
       y += 15;
     }
     
-    // Fixed: Correct data mapping without Basic Salary column
-    const rowData = [
-      employee.name.substring(0, 20),
-      employee.department.substring(0, 18),
-      employee.workingDays?.toString() || '0',
-      `PKR ${(employee.calculatedSalary || 0).toLocaleString()}`,
-      '' // Signature field left blank for manual signing
-    ];
+    // Create row data based on selected columns
+    const dataMapping = {
+      name: employee.name.substring(0, 20),
+      department: employee.department.substring(0, 18),
+      cnic: employee.cnic.substring(0, 15),
+      category: employee.category,
+      basicSalary: `PKR ${(employee.basicSalary || 0).toLocaleString()}`,
+      workingDays: (employee.workingDays || 0).toString(),
+      totalSalary: `PKR ${(employee.calculatedSalary || 0).toLocaleString()}`,
+      signature: '' // Signature field left blank for manual signing
+    };
+
+    const rowData = columnsToShow.map(col => dataMapping[col as keyof typeof dataMapping] || '');
     
     x = 15;
     rowData.forEach((data, colIndex) => {

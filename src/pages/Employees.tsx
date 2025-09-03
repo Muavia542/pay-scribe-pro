@@ -6,7 +6,8 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Trash2, Plus, Search, Download, Edit2, ChevronUp, ChevronDown } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Trash2, Plus, Search, Download, Edit2, ChevronUp, ChevronDown, Settings, ArrowUpDown } from "lucide-react";
 import { DatePicker } from "@/components/ui/date-picker";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -19,8 +20,19 @@ const Employees = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedDepartment, setSelectedDepartment] = useState("all");
   const [selectedDate, setSelectedDate] = useState<Date>();
-  const [sortBy, setSortBy] = useState<'name' | 'department' | 'basicSalary' | 'workingDays'>('name');
+  const [sortBy, setSortBy] = useState<'name' | 'department' | 'basicSalary' | 'workingDays'>('department');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [isColumnSelectOpen, setIsColumnSelectOpen] = useState(false);
+  const [selectedColumns, setSelectedColumns] = useState({
+    name: true,
+    department: true,
+    workingDays: true,
+    totalSalary: true,
+    signature: true,
+    basicSalary: false,
+    category: false,
+    cnic: false
+  });
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [newEmployee, setNewEmployee] = useState({
@@ -92,35 +104,14 @@ const Employees = () => {
       return matchesSearch && matchesDepartment;
     })
     .sort((a, b) => {
-      let aValue, bValue;
-      
-      switch (sortBy) {
-        case 'name':
-          aValue = a.name.toLowerCase();
-          bValue = b.name.toLowerCase();
-          break;
-        case 'department':
-          aValue = a.department.toLowerCase();
-          bValue = b.department.toLowerCase();
-          break;
-        case 'basicSalary':
-          aValue = a.basicSalary;
-          bValue = b.basicSalary;
-          break;
-        case 'workingDays':
-          aValue = a.workingDays;
-          bValue = b.workingDays;
-          break;
-        default:
-          aValue = a.name.toLowerCase();
-          bValue = b.name.toLowerCase();
+      // Primary sort by department
+      const deptComparison = a.department.toLowerCase().localeCompare(b.department.toLowerCase());
+      if (deptComparison !== 0) {
+        return deptComparison;
       }
       
-      if (sortOrder === 'asc') {
-        return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
-      } else {
-        return aValue > bValue ? -1 : aValue < bValue ? 1 : 0;
-      }
+      // Secondary sort by name within the same department
+      return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
     });
 
   const handleSort = (field: 'name' | 'department' | 'basicSalary' | 'workingDays') => {
@@ -290,11 +281,19 @@ const Employees = () => {
   const handleDownloadPDF = () => {
     const month = selectedDate ? format(selectedDate, "MMMM") : "Current";
     const year = selectedDate ? format(selectedDate, "yyyy") : new Date().getFullYear().toString();
-    generateEmployeesPDF(filteredEmployees, month, year);
+    generateEmployeesPDF(filteredEmployees, month, year, selectedColumns);
     toast({
       title: "PDF Generated",
       description: "Employee report has been downloaded successfully.",
     });
+    setIsColumnSelectOpen(false);
+  };
+
+  const handleSortByDepartmentName = () => {
+    // This function is called when the sort button is clicked
+    // It will sort by department first, then by name within each department
+    setSortBy('department');
+    setSortOrder('asc');
   };
 
   return (
@@ -306,6 +305,10 @@ const Employees = () => {
           <p className="text-muted-foreground mt-1">Manage your workforce and employee details</p>
         </div>
         <div className="flex gap-3">
+          <Button variant="outline" onClick={handleSortByDepartmentName}>
+            <ArrowUpDown className="w-4 h-4 mr-2" />
+            Sort by Department & Name
+          </Button>
           <div className="flex gap-2 items-end">
             <div>
               <Label className="text-sm font-medium">Report Month</Label>
@@ -316,10 +319,49 @@ const Employees = () => {
                 className="w-48"
               />
             </div>
-            <Button variant="outline" onClick={handleDownloadPDF}>
-              <Download className="w-4 h-4 mr-2" />
-              Download PDF
-            </Button>
+            <Dialog open={isColumnSelectOpen} onOpenChange={setIsColumnSelectOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline">
+                  <Settings className="w-4 h-4 mr-2" />
+                  <Download className="w-4 h-4 mr-1" />
+                  Download PDF
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Select Columns for PDF Export</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <p className="text-sm text-muted-foreground">Choose which columns to include in the PDF:</p>
+                  <div className="space-y-3">
+                    {Object.entries({
+                      name: "Name",
+                      department: "Department", 
+                      cnic: "CNIC",
+                      category: "Category",
+                      basicSalary: "Basic Salary",
+                      workingDays: "Working Days",
+                      totalSalary: "Total Salary",
+                      signature: "Signature"
+                    }).map(([key, label]) => (
+                      <div key={key} className="flex items-center space-x-2">
+                        <Checkbox 
+                          id={key}
+                          checked={selectedColumns[key as keyof typeof selectedColumns]}
+                          onCheckedChange={(checked) => 
+                            setSelectedColumns(prev => ({ ...prev, [key]: checked }))
+                          }
+                        />
+                        <Label htmlFor={key}>{label}</Label>
+                      </div>
+                    ))}
+                  </div>
+                  <Button onClick={handleDownloadPDF} className="w-full">
+                    Generate PDF with Selected Columns
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogTrigger asChild>
