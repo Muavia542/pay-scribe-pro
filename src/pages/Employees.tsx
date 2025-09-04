@@ -703,6 +703,21 @@ const Employees = () => {
           </Table>
         </CardContent>
       </Card>
+
+      {/* Footer */}
+      <div className="bg-black text-white p-6 rounded-lg mt-8">
+        <div className="flex justify-between items-center text-sm font-semibold">
+          <div className="text-left">
+            <p>Address: VPO Makori Tehsil Banda Daud Shah District Karak</p>
+          </div>
+          <div className="text-center">
+            <p>Email: mshamidkhattak@gmail.com</p>
+          </div>
+          <div className="text-right">
+            <p>Contact No: 03155157591</p>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

@@ -36,14 +36,14 @@ const ProjectInvoice = () => {
   const [lineItems, setLineItems] = useState<LineItem[]>([
     {
       id: "1",
-      description: "Weed and Grass Cutting Services",
-      quantity: 1,
-      rate: 50000,
-      amount: 50000
+      description: "CUTTING WILD GRASS AND WEED REMOVAL AT KARAK BLOCK LOCATIONS FOR 3 YEARS: Makori West-1 Well Site 2. Makori East-2 Well Site 3. Makori East-3 Well Site 4. Manzalia -5 Well Site 5. Makori East-5 Well Site 6. Makori East-6 Well Site 7. Makori East-VA 8. Makori-3 Well Site 9. Makori Deep-1 Well Site 10. Makori Deep-2 Well Site 11. Makori Deep-1 VA (Tie Point) 12. Makori Deep-2 VA (Tie Point)",
+      quantity: 12,
+      rate: 47000,
+      amount: 564000
     }
   ]);
   
-  const [localManagement, setLocalManagement] = useState(5000);
+  const [localManagement, setLocalManagement] = useState({ quantity: 12, rate: 13000, amount: 156000 });
   const [gstRate, setGstRate] = useState(15);
   const [savedInvoices, setSavedInvoices] = useState<any[]>([]);
   
@@ -52,7 +52,7 @@ const ProjectInvoice = () => {
 
   // Calculate totals
   const lineItemsTotal = lineItems.reduce((sum, item) => sum + item.amount, 0);
-  const subTotal = lineItemsTotal + localManagement;
+  const subTotal = lineItemsTotal + localManagement.amount;
   const gstAmount = (subTotal * gstRate) / 100;
   const totalAmount = subTotal + gstAmount;
 
@@ -157,7 +157,7 @@ const ProjectInvoice = () => {
           contract_number: invoiceData.contractNumber,
           service_description: `${projectType} - ${round}`,
           sub_total: subTotal,
-          service_fee: localManagement,
+          service_fee: localManagement.amount,
           gst_rate: gstRate,
           gst_amount: gstAmount,
           total_amount: totalAmount
@@ -287,15 +287,43 @@ const ProjectInvoice = () => {
             </div>
           </div>
 
-          {/* Local Management Fee */}
-          <div>
-            <Label htmlFor="localManagement">Local Management Fee (PKR)</Label>
-            <Input
-              id="localManagement"
-              type="number"
-              value={localManagement}
-              onChange={(e) => setLocalManagement(Number(e.target.value))}
-            />
+          {/* Local Management */}
+          <div className="grid grid-cols-3 gap-4">
+            <div>
+              <Label htmlFor="localMgmtQty">Local Management Quantity</Label>
+              <Input
+                id="localMgmtQty"
+                type="number"
+                value={localManagement.quantity}
+                onChange={(e) => setLocalManagement(prev => ({
+                  ...prev,
+                  quantity: Number(e.target.value),
+                  amount: Number(e.target.value) * prev.rate
+                }))}
+              />
+            </div>
+            <div>
+              <Label htmlFor="localMgmtRate">Local Management Rate (PKR)</Label>
+              <Input
+                id="localMgmtRate"
+                type="number"
+                value={localManagement.rate}
+                onChange={(e) => setLocalManagement(prev => ({
+                  ...prev,
+                  rate: Number(e.target.value),
+                  amount: prev.quantity * Number(e.target.value)
+                }))}
+              />
+            </div>
+            <div>
+              <Label htmlFor="localMgmtAmount">Local Management Amount (PKR)</Label>
+              <Input
+                id="localMgmtAmount"
+                value={localManagement.amount.toLocaleString()}
+                readOnly
+                className="bg-muted"
+              />
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -429,9 +457,9 @@ const ProjectInvoice = () => {
                 ))}
                 <TableRow>
                   <TableCell>Local Management</TableCell>
-                  <TableCell className="text-right">1</TableCell>
-                  <TableCell className="text-right">{localManagement.toLocaleString()}</TableCell>
-                  <TableCell className="text-right">{localManagement.toLocaleString()}</TableCell>
+                  <TableCell className="text-right">{localManagement.quantity}</TableCell>
+                  <TableCell className="text-right">{localManagement.rate.toLocaleString()}</TableCell>
+                  <TableCell className="text-right">{localManagement.amount.toLocaleString()}</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell colSpan={3} className="font-medium">Sub Total</TableCell>
