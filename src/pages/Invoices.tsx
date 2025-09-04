@@ -78,12 +78,51 @@ const Invoices = () => {
         </div>
       </div>
 
-      {/* Generate Invoice */}
+      {/* Invoice Type Selection */}
       <Card className="shadow-soft">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Plus className="w-5 h-5" />
-            Generate New Invoice
+            Select Invoice Type
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Card className="border-2 border-dashed border-muted hover:border-primary cursor-pointer transition-colors"
+                  onClick={() => window.open('/project-invoice', '_blank')}>
+              <CardContent className="p-6 text-center">
+                <FileText className="w-12 h-12 text-primary mx-auto mb-4" />
+                <h3 className="font-semibold mb-2">Project Invoice</h3>
+                <p className="text-sm text-muted-foreground">Generate invoices for specific projects like Weed & Grass Cutting</p>
+              </CardContent>
+            </Card>
+            
+            <Card className="border-2 border-dashed border-muted hover:border-primary cursor-pointer transition-colors"
+                  onClick={() => window.open('/kpk-invoice', '_blank')}>
+              <CardContent className="p-6 text-center">
+                <FileText className="w-12 h-12 text-success mx-auto mb-4" />
+                <h3 className="font-semibold mb-2">KPK Invoice</h3>
+                <p className="text-sm text-muted-foreground">Generate KPK department invoices with standard calculations</p>
+              </CardContent>
+            </Card>
+            
+            <Card className="border-2 border-dashed border-muted hover:border-primary cursor-pointer transition-colors">
+              <CardContent className="p-6 text-center">
+                <FileText className="w-12 h-12 text-warning mx-auto mb-4" />
+                <h3 className="font-semibold mb-2">Custom Invoice</h3>
+                <p className="text-sm text-muted-foreground">Create custom invoices with flexible line items</p>
+              </CardContent>
+            </Card>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Traditional Generate Invoice */}
+      <Card className="shadow-soft">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <FileText className="w-5 h-5" />
+            Generate Department Invoice
           </CardTitle>
         </CardHeader>
         <CardContent>

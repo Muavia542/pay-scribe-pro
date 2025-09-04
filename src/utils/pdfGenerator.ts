@@ -14,136 +14,173 @@ export const roundInvoiceAmount = (amount: number): number => {
 };
 
 export const generateEmployeesPDF = (employees: Employee[], month: string, year: string, selectedColumns?: any) => {
-  const doc = new jsPDF();
+  const pdf = new jsPDF();
+  const pageWidth = pdf.internal.pageSize.getWidth();
+  const pageHeight = pdf.internal.pageSize.getHeight();
   
-  // Add header with light blue background (sky color)
-  doc.setFillColor(135, 206, 235); // Light blue sky color
-  doc.rect(0, 0, 210, 40, 'F'); // Full width header
+  // Add company header with sky blue background
+  pdf.setFillColor(135, 206, 235); // Sky blue color
+  pdf.rect(0, 0, pageWidth, 35, 'F');
   
-  // Add logo
-  try {
-    const logoImg = new Image();
-    logoImg.src = '/lovable-uploads/3ad6dd25-3db5-4d04-bb8a-fed3dd000209.png';
-    doc.addImage(logoImg, 'PNG', 10, 5, 30, 30);
-  } catch (error) {
-    console.warn('Logo could not be added to PDF');
-  }
+  // Add logo/company name
+  pdf.setTextColor(255, 255, 255); // White text
+  pdf.setFontSize(22);
+  pdf.setFont('helvetica', 'bold');
+  const companyName = 'Tahira Construction & Services';
+  const companyNameWidth = pdf.getTextWidth(companyName);
+  pdf.text(companyName, (pageWidth - companyNameWidth) / 2, 25);
   
-  // Add company name in header
-  doc.setTextColor(255, 255, 255); // White text for header
-  doc.setFontSize(22);
-  doc.setFont('helvetica', 'bold');
-  doc.text('Tahira Construction & Services', 50, 20);
+  // Reset text color for rest of document
+  pdf.setTextColor(0, 0, 0);
   
-  // Add report title
-  doc.setTextColor(0, 0, 0); // Black text
-  doc.setFontSize(18);
-  doc.setFont('helvetica', 'bold');
-  doc.text('Employee Details Report', 50, 50);
+  // Add title
+  pdf.setFontSize(16);
+  pdf.setFont('helvetica', 'bold');
+  const title = `Employee Details Report - ${month} ${year}`;
+  const titleWidth = pdf.getTextWidth(title);
+  pdf.text(title, (pageWidth - titleWidth) / 2, 55);
   
-  // Add subtitle
-  doc.setFontSize(14);
-  doc.setFont('helvetica', 'normal');
-  doc.text(`${month} ${year}`, 50, 65);
-  
-  // Determine which columns to include (always include S.No first)
-  const columnMapping = {
-    serialNo: { header: 'S.No', width: 15 },
-    name: { header: 'Name', width: 30 },
-    department: { header: 'Department', width: 25 },
-    cnic: { header: 'CNIC', width: 30 },
-    category: { header: 'Category', width: 20 },
-    basicSalary: { header: 'Basic Salary', width: 25 },
-    workingDays: { header: 'Working Days', width: 20 },
-    totalSalary: { header: 'Total Salary', width: 25 },
-    signature: { header: 'Signature', width: 25 }
-  };
+  // Define columns and their widths
+  const columns = [
+    { header: 'S.No', dataKey: 'serialNumber', width: 15 },
+    ...(selectedColumns?.name !== false ? [{ header: 'Name', dataKey: 'name', width: 40 }] : []),
+    ...(selectedColumns?.department !== false ? [{ header: 'Department', dataKey: 'department', width: 35 }] : []),
+    ...(selectedColumns?.workingDays !== false ? [{ header: 'Working Days', dataKey: 'workingDays', width: 25 }] : []),
+    ...(selectedColumns?.totalSalary !== false ? [{ header: 'Total Salary', dataKey: 'calculatedSalary', width: 30 }] : []),
+    ...(selectedColumns?.signature !== false ? [{ header: 'Signature', dataKey: 'signature', width: 30 }] : []),
+    ...(selectedColumns?.basicSalary === true ? [{ header: 'Basic Salary', dataKey: 'basicSalary', width: 30 }] : []),
+    ...(selectedColumns?.category === true ? [{ header: 'Category', dataKey: 'category', width: 25 }] : []),
+    ...(selectedColumns?.cnic === true ? [{ header: 'CNIC', dataKey: 'cnic', width: 35 }] : [])
+  ];
 
-  // Use selected columns or default columns, always include serial number
-  const defaultColumns = ['serialNo', 'name', 'department', 'workingDays', 'totalSalary', 'signature'];
-  let columnsToShow = selectedColumns 
-    ? ['serialNo', ...Object.keys(selectedColumns).filter(key => selectedColumns[key] && key !== 'serialNo')]
-    : defaultColumns;
+  // Prepare data for the table with serial numbers
+  const data = employees.map((emp, index) => ({
+    serialNumber: (index + 1).toString(),
+    name: emp.name,
+    department: emp.department,
+    workingDays: emp.workingDays?.toString() || '0',
+    calculatedSalary: `PKR ${emp.calculatedSalary?.toLocaleString() || '0'}`,
+    signature: '',
+    basicSalary: `PKR ${emp.basicSalary?.toLocaleString() || '0'}`,
+    category: emp.category || '',
+    cnic: emp.cnic || ''
+  }));
 
-  const headers = columnsToShow.map(col => columnMapping[col as keyof typeof columnMapping].header);
-  const colWidths = columnsToShow.map(col => columnMapping[col as keyof typeof columnMapping].width);
+  let yPosition = 75;
+
+  // Table header with better styling
+  pdf.setFontSize(10);
+  pdf.setFont('helvetica', 'bold');
   
-  doc.setFontSize(10);
-  let y = 80;
+  // Header background
+  pdf.setFillColor(240, 240, 240); // Light gray background
+  let xPosition = 20;
+  let totalWidth = columns.reduce((sum, col) => sum + col.width, 0);
+  pdf.rect(xPosition, yPosition, totalWidth, 12, 'F');
   
-  // Header row
-  let x = 15;
-  headers.forEach((header, index) => {
-    doc.text(header, x, y);
-    x += colWidths[index];
+  // Header borders and text
+  pdf.setDrawColor(0, 0, 0); // Black border
+  pdf.setLineWidth(0.5);
+  xPosition = 20;
+  columns.forEach((col) => {
+    pdf.rect(xPosition, yPosition, col.width, 12);
+    pdf.text(col.header, xPosition + 2, yPosition + 8);
+    xPosition += col.width;
   });
   
-  y += 15;
+  yPosition += 12;
   
-  // Add employee data
-  employees.forEach((employee, index) => {
-    if (y > 270) { // New page if needed
-      doc.addPage();
-      y = 30;
-      // Repeat headers on new page
-      x = 15;
-      headers.forEach((header, index) => {
-        doc.text(header, x, y);
-        x += colWidths[index];
+  // Table rows with better formatting
+  pdf.setFont('helvetica', 'normal');
+  
+  data.forEach((row, index) => {
+    if (yPosition > pageHeight - 40) {
+      pdf.addPage();
+      yPosition = 30;
+      
+      // Repeat header on new page
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFillColor(240, 240, 240);
+      let headerX = 20;
+      let totalWidth = columns.reduce((sum, col) => sum + col.width, 0);
+      pdf.rect(headerX, yPosition, totalWidth, 12, 'F');
+      
+      headerX = 20;
+      columns.forEach((col) => {
+        pdf.rect(headerX, yPosition, col.width, 12);
+        pdf.text(col.header, headerX + 2, yPosition + 8);
+        headerX += col.width;
       });
-      y += 15;
+      yPosition += 12;
+      pdf.setFont('helvetica', 'normal');
     }
     
-    // Create row data based on selected columns
-    const dataMapping = {
-      serialNo: (index + 1).toString(),
-      name: employee.name.substring(0, 18),
-      department: employee.department.substring(0, 15),
-      cnic: employee.cnic.substring(0, 13),
-      category: employee.category,
-      basicSalary: `PKR ${(employee.basicSalary || 0).toLocaleString()}`,
-      workingDays: (employee.workingDays || 0).toString(),
-      totalSalary: `PKR ${(employee.calculatedSalary || 0).toLocaleString()}`,
-      signature: '' // Signature field left blank for manual signing
-    };
-
-    const rowData = columnsToShow.map(col => dataMapping[col as keyof typeof dataMapping] || '');
+    // Alternating row colors for better readability
+    if (index % 2 === 1) {
+      pdf.setFillColor(250, 250, 250); // Very light gray
+      let totalWidth = columns.reduce((sum, col) => sum + col.width, 0);
+      pdf.rect(20, yPosition, totalWidth, 10, 'F');
+    }
     
-    x = 15;
-    rowData.forEach((data, colIndex) => {
-      doc.text(data, x, y);
-      x += colWidths[colIndex];
+    let rowX = 20;
+    columns.forEach((col) => {
+      const cellValue = row[col.dataKey as keyof typeof row] || '';
+      pdf.setDrawColor(0, 0, 0);
+      pdf.setLineWidth(0.3);
+      pdf.rect(rowX, yPosition, col.width, 10);
+      
+      // Text alignment and truncation for long content
+      let displayText = cellValue.toString();
+      if (col.dataKey === 'name' && displayText.length > 18) {
+        displayText = displayText.substring(0, 15) + '...';
+      } else if (col.dataKey === 'department' && displayText.length > 15) {
+        displayText = displayText.substring(0, 12) + '...';
+      }
+      
+      pdf.text(displayText, rowX + 2, yPosition + 7);
+      rowX += col.width;
     });
     
-    y += 10; // Increased spacing between rows
+    yPosition += 10;
   });
   
   // Add summary
-  y += 15;
+  yPosition += 15;
+  pdf.setFont('helvetica', 'bold');
+  pdf.setFontSize(12);
+  pdf.text(`Total Employees: ${employees.length}`, 20, yPosition);
+  
   const totalSalary = employees.reduce((sum, emp) => sum + (emp.calculatedSalary || 0), 0);
-  doc.setFontSize(12);
-  doc.text(`Total Employees: ${employees.length}`, 20, y);
-  doc.text(`Total Salary: PKR ${totalSalary.toLocaleString()}`, 20, y + 12);
+  pdf.text(`Total Salary: PKR ${totalSalary.toLocaleString()}`, 20, yPosition + 10);
+
+  // Add footer with company information - light blue background
+  const footerY = pageHeight - 20;
+  pdf.setFillColor(135, 206, 235); // Sky blue color
+  pdf.rect(0, footerY - 5, pageWidth, 25, 'F');
   
-  // Add footer with light blue background
-  const pageHeight = doc.internal.pageSize.height;
-  doc.setFillColor(135, 206, 235); // Light blue sky color
-  doc.rect(0, pageHeight - 20, 210, 20, 'F'); // Full width footer
+  pdf.setFontSize(10);
+  pdf.setFont('helvetica', 'bold');
+  pdf.setTextColor(0, 0, 0); // Black text for better contrast
   
-  // Add footer content
-  doc.setTextColor(255, 255, 255); // White text for footer
-  doc.setFontSize(8);
-  doc.setFont('helvetica', 'normal');
+  // Footer content in three sections - horizontally aligned
+  const leftText = 'Address: VPO Makori Tehsil Banda Daud Shah District Karak';
+  const centerText = 'Email: mshamidkhattak@gmail.com';
+  const rightText = 'Contact No: 03155157591';
   
-  // Left: Address
-  doc.text('Address: VPO Makori Tehsil Banda Daud Shah District Karak', 10, pageHeight - 10);
+  // Calculate positions for horizontal alignment
+  const sectionWidth = pageWidth / 3;
   
-  // Center: Email
-  doc.text('Email: mshamidkhattak@gmail.com', 70, pageHeight - 10);
+  // Left section
+  pdf.text(leftText, 10, footerY + 5, { maxWidth: sectionWidth - 15 });
   
-  // Right: Contact
-  doc.text('Contact No: 03155157591', 150, pageHeight - 10);
+  // Center section
+  const centerTextWidth = pdf.getTextWidth(centerText);
+  pdf.text(centerText, (pageWidth - centerTextWidth) / 2, footerY + 5);
   
+  // Right section
+  const rightTextWidth = pdf.getTextWidth(rightText);
+  pdf.text(rightText, pageWidth - rightTextWidth - 10, footerY + 5);
+
   // Save the PDF
-  doc.save(`employees-report-${month}-${year}.pdf`);
+  pdf.save(`employees-report-${month}-${year}.pdf`);
 };

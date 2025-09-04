@@ -12,6 +12,8 @@ import InvoicesNew from "./pages/InvoicesNew";
 import SavedInvoices from "./pages/SavedInvoices";
 import ImportData from "./pages/ImportData";
 import KPKInvoice from "./pages/KPKInvoice";
+import ProjectInvoice from "./pages/ProjectInvoice";
+import WeedGrassCuttingInvoice from "./pages/WeedGrassCuttingInvoice";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import Layout from "./components/Layout";
@@ -95,6 +97,20 @@ const AppRoutes = () => {
         <ProtectedRoute>
           <Layout>
             <SavedInvoices />
+          </Layout>
+        </ProtectedRoute>
+      } />
+      <Route path="/project-invoice" element={
+        <ProtectedRoute>
+          <Layout>
+            <ProjectInvoice />
+          </Layout>
+        </ProtectedRoute>
+      } />
+      <Route path="/weed-grass-cutting" element={
+        <ProtectedRoute>
+          <Layout>
+            <WeedGrassCuttingInvoice />
           </Layout>
         </ProtectedRoute>
       } />
