@@ -2,16 +2,35 @@ import StatCard from "@/components/StatCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Users, Building, DollarSign, TrendingUp, Plus, FileText } from "lucide-react";
-import { mockEmployees, mockDepartments, calculateTotalSalary } from "@/utils/mockData";
 import { Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 const Dashboard = () => {
-  const totalEmployees = mockEmployees.length;
-  const totalDepartments = mockDepartments.length;
-  const totalMonthlySalary = calculateTotalSalary(mockEmployees);
-  const avgSalaryPerEmployee = totalEmployees > 0 ? Math.round(totalMonthlySalary / totalEmployees) : 0;
+  const { data: employees } = useQuery({
+    queryKey: ['employees'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('employees').select('*');
+      if (error) throw error;
+      return data;
+    }
+  });
 
-  const recentEmployees = mockEmployees.slice(-3).reverse();
+  const { data: departments } = useQuery({
+    queryKey: ['departments'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('departments').select('*');
+      if (error) throw error;
+      return data;
+    }
+  });
+
+  const totalEmployees = employees?.length || 0;
+  const totalDepartments = departments?.length || 0;
+  const totalMonthlySalary = employees?.reduce((sum, emp) => sum + (emp.calculated_salary || 0), 0) || 0;
+  const avgSalaryPerEmployee = totalEmployees > 0 ? Math.round(totalMonthlySalary / totalEmployees) : 0;
+  
+  const recentEmployees = employees?.slice(-3).reverse() || [];
   
   return (
     <div className="space-y-8">
@@ -20,7 +39,7 @@ const Dashboard = () => {
         <div>
           <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
           <p className="text-muted-foreground mt-1">
-            Welcome to PayScribe Pro - Manage your workforce efficiently
+            Welcome to Tahira Construction - Manage your workforce efficiently
           </p>
         </div>
         <div className="flex gap-3">
@@ -31,7 +50,7 @@ const Dashboard = () => {
             </Link>
           </Button>
           <Button variant="outline" asChild>
-            <Link to="/invoices">
+            <Link to="/kpk-invoice">
               <FileText className="w-4 h-4 mr-2" />
               Generate Invoice
             </Link>
@@ -92,8 +111,8 @@ const Dashboard = () => {
                     <p className="text-sm text-muted-foreground">{employee.department}</p>
                   </div>
                   <div className="text-right">
-                    <p className="font-medium text-foreground">PKR {employee.calculatedSalary?.toLocaleString()}</p>
-                    <p className="text-xs text-muted-foreground">{employee.workingDays} days</p>
+                    <p className="font-medium text-foreground">PKR {employee.calculated_salary?.toLocaleString()}</p>
+                    <p className="text-xs text-muted-foreground">{employee.working_days} days</p>
                   </div>
                 </div>
               ))}
@@ -113,18 +132,18 @@ const Dashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {mockDepartments.map((dept) => (
+              {departments?.map((dept) => (
                 <div key={dept.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
                   <div>
                     <p className="font-medium text-foreground">{dept.name}</p>
-                    <p className="text-sm text-muted-foreground">{dept.employeeCount} employees</p>
+                    <p className="text-sm text-muted-foreground">{dept.employee_count} employees</p>
                   </div>
                   <div className="text-right">
-                    <p className="font-medium text-foreground">PKR {dept.totalSalary.toLocaleString()}</p>
+                    <p className="font-medium text-foreground">PKR {dept.total_salary?.toLocaleString()}</p>
                     <p className="text-xs text-success">Total payroll</p>
                   </div>
                 </div>
-              ))}
+              )) || []}
             </div>
           </CardContent>
         </Card>

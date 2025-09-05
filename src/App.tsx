@@ -8,7 +8,7 @@ import Dashboard from "./pages/Dashboard";
 import Employees from "./pages/Employees";
 import Departments from "./pages/Departments";
 import Payroll from "./pages/Payroll";
-import InvoicesNew from "./pages/InvoicesNew";
+import DynamicInvoiceGenerator from "./pages/DynamicInvoiceGenerator";
 import SavedInvoices from "./pages/SavedInvoices";
 import ImportData from "./pages/ImportData";
 import KPKInvoice from "./pages/KPKInvoice";
@@ -72,10 +72,10 @@ const AppRoutes = () => {
           </Layout>
         </ProtectedRoute>
       } />
-      <Route path="/invoices" element={
+      <Route path="/dynamic-invoice" element={
         <ProtectedRoute>
           <Layout>
-            <InvoicesNew />
+            <DynamicInvoiceGenerator />
           </Layout>
         </ProtectedRoute>
       } />

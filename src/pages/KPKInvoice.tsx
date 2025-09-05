@@ -10,7 +10,8 @@ import { Badge } from "@/components/ui/badge";
 import { DatePicker } from "@/components/ui/date-picker";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Printer, FileText, Eye, Trash2 } from "lucide-react";
+import { Printer, FileText, Eye, Trash2, Plus } from "lucide-react";
+import { Link } from "react-router-dom";
 import { roundInvoiceAmount } from "@/utils/pdfGenerator";
 import { format } from "date-fns";
 // Removed missing logo import; using public asset path
@@ -206,6 +207,18 @@ const KPKInvoice = () => {
           <p className="text-muted-foreground mt-1">Generate professional sales tax invoices</p>
         </div>
         <div className="flex gap-2">
+          <Button asChild variant="outline">
+            <Link to="/dynamic-invoice">
+              <Plus className="w-4 h-4 mr-2" />
+              Dynamic Invoice
+            </Link>
+          </Button>
+          <Button asChild variant="outline">
+            <Link to="/weed-grass-cutting">
+              <FileText className="w-4 h-4 mr-2" />
+              Weed Cutting
+            </Link>
+          </Button>
           <Button variant="outline" onClick={handlePrint}>
             <Printer className="w-4 h-4 mr-2" />
             Print
