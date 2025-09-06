@@ -41,7 +41,8 @@ const Employees = () => {
     department: "",
     category: "Skilled" as "Skilled" | "Unskilled",
     basicSalary: "",
-    workingDays: "26"
+    workingDays: "26",
+    cashPayment: false
   });
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editEmployee, setEditEmployee] = useState<{
@@ -52,6 +53,7 @@ const Employees = () => {
     category: "Skilled" | "Unskilled";
     basicSalary: string;
     workingDays: string;
+    cashPayment: boolean;
   } | null>(null);
   const { toast } = useToast();
 
@@ -78,6 +80,7 @@ const Employees = () => {
         basicSalary: Number(emp.basic_salary),
         workingDays: Number(emp.working_days),
         calculatedSalary: Number(emp.calculated_salary),
+        cashPayment: emp.cash_payment || false,
         createdAt: new Date(emp.created_at),
         updatedAt: new Date(emp.updated_at)
       }));
@@ -178,7 +181,8 @@ const Employees = () => {
           department: newEmployee.department,
           category: newEmployee.category,
           basic_salary: basicSalary,
-          working_days: workingDays
+          working_days: workingDays,
+          cash_payment: newEmployee.cashPayment
         });
 
       if (error) throw error;
@@ -194,7 +198,8 @@ const Employees = () => {
         department: "",
         category: "Skilled",
         basicSalary: "",
-        workingDays: "26"
+        workingDays: "26",
+        cashPayment: false
       });
       setIsAddDialogOpen(false);
       fetchEmployees(); // Refresh the list
@@ -244,6 +249,7 @@ const Employees = () => {
       category: emp.category,
       basicSalary: String(emp.basicSalary),
       workingDays: String(emp.workingDays),
+      cashPayment: emp.cashPayment || false,
     });
     setIsEditDialogOpen(true);
   };
@@ -278,6 +284,7 @@ const Employees = () => {
           category: editEmployee.category,
           basic_salary: basicSalary,
           working_days: workingDays,
+          cash_payment: editEmployee.cashPayment,
         })
         .eq('id', editEmployee.id);
 
@@ -296,7 +303,7 @@ const Employees = () => {
   const handleDownloadPDF = () => {
     const month = selectedDate ? format(selectedDate, "MMMM") : "Current";
     const year = selectedDate ? format(selectedDate, "yyyy") : new Date().getFullYear().toString();
-    generateEmployeesPDF(filteredEmployees, month, year, selectedColumns);
+    generateEmployeesPDF(filteredEmployees, month, year, selectedColumns, selectedDepartment);
     toast({
       title: "PDF Generated",
       description: "Employee report has been downloaded successfully.",
@@ -436,7 +443,8 @@ const Employees = () => {
                     <SelectItem value="BS">BS</SelectItem>
                     <SelectItem value="Production Area-1">Production Area-1</SelectItem>
                     <SelectItem value="Production Area-2">Production Area-2</SelectItem>
-                     <SelectItem value="Process & Inspection">Process & Inspection</SelectItem>
+                    <SelectItem value="Process & Inspection">Process & Inspection</SelectItem>
+                    <SelectItem value="N/A">N/A</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -471,6 +479,14 @@ const Employees = () => {
                   onChange={(e) => setNewEmployee({ ...newEmployee, workingDays: e.target.value })}
                   placeholder="26"
                 />
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox 
+                  id="cashPayment"
+                  checked={newEmployee.cashPayment}
+                  onCheckedChange={(checked) => setNewEmployee({ ...newEmployee, cashPayment: !!checked })}
+                />
+                <Label htmlFor="cashPayment" className="text-sm font-medium">Cash Payment</Label>
               </div>
               <Button onClick={handleAddEmployee} className="w-full">
                 Add Employee
@@ -518,7 +534,8 @@ const Employees = () => {
                     <SelectItem value="BS">BS</SelectItem>
                     <SelectItem value="Production Area-1">Production Area-1</SelectItem>
                     <SelectItem value="Production Area-2">Production Area-2</SelectItem>
-                     <SelectItem value="Process & Inspection">Process & Inspection</SelectItem>
+                    <SelectItem value="Process & Inspection">Process & Inspection</SelectItem>
+                    <SelectItem value="N/A">N/A</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -554,6 +571,14 @@ const Employees = () => {
                   placeholder="26"
                 />
               </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox 
+                  id="edit-cashPayment"
+                  checked={editEmployee.cashPayment}
+                  onCheckedChange={(checked) => setEditEmployee({ ...editEmployee, cashPayment: !!checked })}
+                />
+                <Label htmlFor="edit-cashPayment" className="text-sm font-medium">Cash Payment</Label>
+              </div>
               <Button onClick={handleUpdateEmployee} className="w-full">
                 Save Changes
               </Button>
@@ -588,6 +613,7 @@ const Employees = () => {
                 <SelectItem value="Production Area-1">Production Area-1</SelectItem>
                 <SelectItem value="Production Area-2">Production Area-2</SelectItem>
                 <SelectItem value="Process & Inspection">Process & Inspection</SelectItem>
+                <SelectItem value="N/A">N/A</SelectItem>
               </SelectContent>
             </Select>
           </div>

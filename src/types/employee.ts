@@ -7,6 +7,7 @@ export interface Employee {
   basicSalary: number;
   workingDays: number;
   calculatedSalary?: number;
+  cashPayment?: boolean;
   createdAt: Date;
   updatedAt: Date;
 }

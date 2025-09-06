@@ -13,7 +13,7 @@ export const roundInvoiceAmount = (amount: number): number => {
   }
 };
 
-export const generateEmployeesPDF = (employees: Employee[], month: string, year: string, selectedColumns?: any) => {
+export const generateEmployeesPDF = (employees: Employee[], month: string, year: string, selectedColumns?: any, department?: string) => {
   const pdf = new jsPDF();
   const pageWidth = pdf.internal.pageSize.getWidth();
   const pageHeight = pdf.internal.pageSize.getHeight();
@@ -36,14 +36,15 @@ export const generateEmployeesPDF = (employees: Employee[], month: string, year:
   // Add title
   pdf.setFontSize(16);
   pdf.setFont('helvetica', 'bold');
-  const title = `Employee Details Report - ${month} ${year}`;
+  const departmentText = department && department !== 'all' ? ` - ${department}` : '';
+  const title = `Employee Details Report${departmentText} - ${month} ${year}`;
   const titleWidth = pdf.getTextWidth(title);
   pdf.text(title, (pageWidth - titleWidth) / 2, 55);
   
   // Define columns and their widths
   const columns = [
     { header: 'S.No', dataKey: 'serialNumber', width: 15 },
-    ...(selectedColumns?.name !== false ? [{ header: 'Name', dataKey: 'name', width: 40 }] : []),
+    ...(selectedColumns?.name !== false ? [{ header: 'Name', dataKey: 'name', width: 50 }] : []),
     ...(selectedColumns?.department !== false ? [{ header: 'Department', dataKey: 'department', width: 35 }] : []),
     ...(selectedColumns?.workingDays !== false ? [{ header: 'Working Days', dataKey: 'workingDays', width: 25 }] : []),
     ...(selectedColumns?.totalSalary !== false ? [{ header: 'Total Salary', dataKey: 'calculatedSalary', width: 30 }] : []),
@@ -131,13 +132,24 @@ export const generateEmployeesPDF = (employees: Employee[], month: string, year:
       
       // Text alignment and truncation for long content
       let displayText = cellValue.toString();
-      if (col.dataKey === 'name' && displayText.length > 18) {
-        displayText = displayText.substring(0, 15) + '...';
+      
+      // Improved text handling for names
+      if (col.dataKey === 'name') {
+        // Use smaller font for names to fit more content
+        pdf.setFontSize(8);
+        if (displayText.length > 25) {
+          displayText = displayText.substring(0, 22) + '...';
+        }
       } else if (col.dataKey === 'department' && displayText.length > 15) {
         displayText = displayText.substring(0, 12) + '...';
       }
       
       pdf.text(displayText, rowX + 2, yPosition + 7);
+      
+      // Reset font size after name column
+      if (col.dataKey === 'name') {
+        pdf.setFontSize(10);
+      }
       rowX += col.width;
     });
     

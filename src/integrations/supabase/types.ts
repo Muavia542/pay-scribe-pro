@@ -48,6 +48,7 @@ export type Database = {
         Row: {
           basic_salary: number
           calculated_salary: number | null
+          cash_payment: boolean | null
           category: string
           cnic: string
           created_at: string
@@ -60,6 +61,7 @@ export type Database = {
         Insert: {
           basic_salary: number
           calculated_salary?: number | null
+          cash_payment?: boolean | null
           category: string
           cnic: string
           created_at?: string
@@ -72,6 +74,7 @@ export type Database = {
         Update: {
           basic_salary?: number
           calculated_salary?: number | null
+          cash_payment?: boolean | null
           category?: string
           cnic?: string
           created_at?: string
