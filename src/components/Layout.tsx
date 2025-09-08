@@ -1,6 +1,6 @@
 import { ReactNode, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Users, Building, Calculator, FileText, BarChart3, Upload, Receipt, Menu, X, LogOut } from "lucide-react";
+import { Users, Building, Calculator, FileText, BarChart3, Upload, Receipt, Menu, X, LogOut, Calendar, Gift } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useAuth } from "@/hooks/useAuth";
@@ -15,6 +15,8 @@ const navigation = [
   { name: "Employees", href: "/employees", icon: Users },
   { name: "Departments", href: "/departments", icon: Building },
   { name: "Payroll", href: "/payroll", icon: Calculator },
+  { name: "Attendance", href: "/attendance", icon: Calendar },
+  { name: "Yearly Bonus", href: "/yearly-bonus", icon: Gift },
   { name: "Generate Invoice", href: "/kpk-invoice", icon: Receipt },
   { name: "Dynamic Invoice", href: "/dynamic-invoice", icon: FileText },
   { name: "Saved Invoices", href: "/saved-invoices", icon: FileText },

@@ -8,6 +8,8 @@ import Dashboard from "./pages/Dashboard";
 import Employees from "./pages/Employees";
 import Departments from "./pages/Departments";
 import Payroll from "./pages/Payroll";
+import Attendance from "./pages/Attendance";
+import YearlyBonus from "./pages/YearlyBonus";
 import DynamicInvoiceGenerator from "./pages/DynamicInvoiceGenerator";
 import SavedInvoices from "./pages/SavedInvoices";
 import ImportData from "./pages/ImportData";
@@ -69,6 +71,20 @@ const AppRoutes = () => {
         <ProtectedRoute>
           <Layout>
             <Payroll />
+          </Layout>
+        </ProtectedRoute>
+      } />
+      <Route path="/attendance" element={
+        <ProtectedRoute>
+          <Layout>
+            <Attendance />
+          </Layout>
+        </ProtectedRoute>
+      } />
+      <Route path="/yearly-bonus" element={
+        <ProtectedRoute>
+          <Layout>
+            <YearlyBonus />
           </Layout>
         </ProtectedRoute>
       } />
