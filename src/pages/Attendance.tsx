@@ -99,15 +99,25 @@ const Attendance = () => {
 
     const records: AttendanceRecord[] = employeeList.map(emp => {
       const dailyAttendance: { [day: number]: 'P' | 'A' } = {};
+      let presentDays = 0;
+      
       for (let day = 1; day <= daysInMonth; day++) {
-        dailyAttendance[day] = 'P'; // Default to Present
+        // Check if the day is a weekend (Saturday = 6, Sunday = 0)
+        const date = new Date(year, month, day);
+        const dayOfWeek = date.getDay();
+        const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+        
+        // Default weekends to Absent, other days to Present
+        dailyAttendance[day] = isWeekend ? 'A' : 'P';
+        if (!isWeekend) presentDays++;
       }
+      
       return {
         employeeId: emp.id,
         employeeName: emp.name,
         category: emp.category,
         dailyAttendance,
-        totalDays: daysInMonth, // Initial total, will be recalculated
+        totalDays: presentDays,
       };
     });
 

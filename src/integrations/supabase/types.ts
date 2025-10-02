@@ -225,6 +225,42 @@ export type Database = {
           },
         ]
       }
+      yearly_bonus: {
+        Row: {
+          bonus_amount: number
+          bonus_year: number
+          category: string
+          created_at: string
+          department: string
+          employee_id: string
+          employee_name: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          bonus_amount?: number
+          bonus_year: number
+          category: string
+          created_at?: string
+          department: string
+          employee_id: string
+          employee_name: string
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          bonus_amount?: number
+          bonus_year?: number
+          category?: string
+          created_at?: string
+          department?: string
+          employee_id?: string
+          employee_name?: string
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

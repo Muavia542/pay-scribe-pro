@@ -28,6 +28,12 @@ const YearlyBonus = () => {
     fetchEmployees();
   }, []);
 
+  useEffect(() => {
+    if (bonusYear && employees.length > 0) {
+      fetchBonusRecords();
+    }
+  }, [bonusYear, employees]);
+
   const fetchEmployees = async () => {
     try {
       const { data, error } = await supabase
@@ -64,6 +70,41 @@ const YearlyBonus = () => {
     }
   };
 
+  const fetchBonusRecords = async () => {
+    try {
+      const year = parseInt(bonusYear);
+      if (isNaN(year)) return;
+
+      const { data, error } = await supabase
+        .from('yearly_bonus')
+        .select('*')
+        .eq('bonus_year', year);
+
+      if (error) throw error;
+
+      // Map existing bonus records to employees
+      const records: BonusRecord[] = employees.map(emp => {
+        const existingBonus = data?.find(b => b.employee_id === emp.id);
+        return {
+          employeeId: emp.id,
+          employeeName: emp.name,
+          department: emp.department,
+          category: emp.category,
+          bonusAmount: existingBonus ? Number(existingBonus.bonus_amount) : 0
+        };
+      });
+
+      setBonusRecords(records);
+    } catch (error) {
+      console.error('Error fetching bonus records:', error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch bonus records",
+        variant: "destructive",
+      });
+    }
+  };
+
   const initializeBonusRecords = (employeeList: Employee[]) => {
     const records: BonusRecord[] = employeeList.map(emp => ({
       employeeId: emp.id,
@@ -75,12 +116,61 @@ const YearlyBonus = () => {
     setBonusRecords(records);
   };
 
-  const updateBonusAmount = (employeeId: string, amount: number) => {
+  const updateBonusAmount = async (employeeId: string, amount: number) => {
     setBonusRecords(prev => prev.map(record => 
       record.employeeId === employeeId 
         ? { ...record, bonusAmount: amount }
         : record
     ));
+
+    // Auto-save to database
+    try {
+      const year = parseInt(bonusYear);
+      if (isNaN(year) || !bonusYear) return;
+
+      const record = bonusRecords.find(r => r.employeeId === employeeId);
+      if (!record) return;
+
+      // Check if record exists
+      const { data: existing } = await supabase
+        .from('yearly_bonus')
+        .select('id')
+        .eq('employee_id', employeeId)
+        .eq('bonus_year', year)
+        .maybeSingle();
+
+      if (existing) {
+        // Update existing record
+        const { error } = await supabase
+          .from('yearly_bonus')
+          .update({ bonus_amount: amount })
+          .eq('employee_id', employeeId)
+          .eq('bonus_year', year);
+
+        if (error) throw error;
+      } else {
+        // Insert new record
+        const { error } = await supabase
+          .from('yearly_bonus')
+          .insert({
+            employee_id: employeeId,
+            employee_name: record.employeeName,
+            department: record.department,
+            category: record.category,
+            bonus_amount: amount,
+            bonus_year: year
+          });
+
+        if (error) throw error;
+      }
+    } catch (error) {
+      console.error('Error saving bonus record:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save bonus amount",
+        variant: "destructive",
+      });
+    }
   };
 
   const getTotalBonus = () => {

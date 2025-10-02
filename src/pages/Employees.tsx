@@ -472,13 +472,38 @@ const Employees = () => {
               </div>
               <div>
                 <Label htmlFor="workingDays">Working Days</Label>
-                <Input
-                  id="workingDays"
-                  type="number"
-                  value={newEmployee.workingDays}
-                  onChange={(e) => setNewEmployee({ ...newEmployee, workingDays: e.target.value })}
-                  placeholder="26"
-                />
+                <div className="flex items-center gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={() => {
+                      const current = parseInt(newEmployee.workingDays) || 0;
+                      if (current > 0) setNewEmployee({ ...newEmployee, workingDays: String(current - 1) });
+                    }}
+                  >
+                    <ChevronDown className="w-4 h-4" />
+                  </Button>
+                  <Input
+                    id="workingDays"
+                    type="number"
+                    value={newEmployee.workingDays}
+                    onChange={(e) => setNewEmployee({ ...newEmployee, workingDays: e.target.value })}
+                    placeholder="26"
+                    className="text-center"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={() => {
+                      const current = parseInt(newEmployee.workingDays) || 0;
+                      setNewEmployee({ ...newEmployee, workingDays: String(current + 1) });
+                    }}
+                  >
+                    <ChevronUp className="w-4 h-4" />
+                  </Button>
+                </div>
               </div>
               <div className="flex items-center space-x-2">
                 <Checkbox 
