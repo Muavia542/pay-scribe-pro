@@ -5,8 +5,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { DatePicker } from "@/components/ui/date-picker";
 import { useToast } from "@/hooks/use-toast";
 import { Printer, Plus, Trash2, Edit2, Save, X } from "lucide-react";
+import { format } from "date-fns";
 
 interface DynamicField {
   id: string;
@@ -30,6 +32,16 @@ const DynamicInvoiceGenerator = () => {
     "General Construction",
     "Security Services"
   ]);
+
+  const [invoiceDetails, setInvoiceDetails] = useState({
+    date: new Date(),
+    contractNumber: "CON1467/25",
+    ntn: "5194834-7",
+    kpkGst: "K-5194834-7",
+    month: "October",
+    year: "2025",
+    service: "Provision of Support Services at Loading Operation-1"
+  });
 
   const [selectedContractType, setSelectedContractType] = useState("");
   const [isEditingFields, setIsEditingFields] = useState(false);
@@ -173,14 +185,19 @@ const DynamicInvoiceGenerator = () => {
             <head>
               <title>Dynamic Invoice - ${selectedContractType}</title>
               <style>
-                body { font-family: Arial, sans-serif; margin: 20px; font-size: 12px; }
-                .invoice-header { text-align: center; margin-bottom: 20px; }
-                .invoice-title { font-size: 16px; font-weight: bold; margin-bottom: 5px; }
-                table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
+                body { font-family: Arial, sans-serif; margin: 20px; font-size: 11px; }
+                .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #000; padding-bottom: 10px; }
+                .header h1 { font-size: 18px; font-weight: bold; margin: 5px 0; color: #0066cc; }
+                .bill-to { margin: 20px 0; }
+                .bill-to p { margin: 2px 0; }
+                .invoice-details { display: flex; justify-content: space-between; margin: 20px 0; }
+                .invoice-details div { flex: 1; }
+                table { width: 100%; border-collapse: collapse; margin: 15px 0; }
                 th, td { border: 1px solid #000; padding: 8px; text-align: left; }
-                th { background-color: #f5f5f5; font-weight: bold; }
+                th { background-color: #f0f0f0; font-weight: bold; }
                 .amount { text-align: right; }
-                .total-row { font-weight: bold; }
+                .total-row { font-weight: bold; background-color: #f9f9f9; }
+                .footer { text-align: center; margin-top: 30px; border-top: 2px solid #000; padding-top: 10px; font-size: 10px; }
                 @media print {
                   body { margin: 0; }
                   @page { size: A4; margin: 0.5in; }
@@ -247,6 +264,74 @@ const DynamicInvoiceGenerator = () => {
                 onChange={(e) => setLocalManagement(prev => ({ ...prev, rate: Number(e.target.value) }))}
               />
             </div>
+          </div>
+          
+          <div className="grid grid-cols-3 gap-4">
+            <div>
+              <Label htmlFor="contract">Contract #</Label>
+              <Input
+                id="contract"
+                value={invoiceDetails.contractNumber}
+                onChange={(e) => setInvoiceDetails({...invoiceDetails, contractNumber: e.target.value})}
+              />
+            </div>
+            <div>
+              <Label htmlFor="ntn">NTN #</Label>
+              <Input
+                id="ntn"
+                value={invoiceDetails.ntn}
+                onChange={(e) => setInvoiceDetails({...invoiceDetails, ntn: e.target.value})}
+              />
+            </div>
+            <div>
+              <Label htmlFor="kpkGst">KPK GST #</Label>
+              <Input
+                id="kpkGst"
+                value={invoiceDetails.kpkGst}
+                onChange={(e) => setInvoiceDetails({...invoiceDetails, kpkGst: e.target.value})}
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-4">
+            <div>
+              <Label htmlFor="month">Invoice For Month</Label>
+              <Select value={invoiceDetails.month} onValueChange={(value) => setInvoiceDetails({...invoiceDetails, month: value})}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select month" />
+                </SelectTrigger>
+                <SelectContent>
+                  {["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"].map(m => (
+                    <SelectItem key={m} value={m}>{m}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="year">Year</Label>
+              <Input
+                id="year"
+                value={invoiceDetails.year}
+                onChange={(e) => setInvoiceDetails({...invoiceDetails, year: e.target.value})}
+              />
+            </div>
+            <div>
+              <Label htmlFor="date">Date</Label>
+              <DatePicker
+                value={invoiceDetails.date}
+                onChange={(date) => setInvoiceDetails({...invoiceDetails, date: date || new Date()})}
+                placeholder="Select date"
+              />
+            </div>
+          </div>
+
+          <div>
+            <Label htmlFor="service">Service Description</Label>
+            <Input
+              id="service"
+              value={invoiceDetails.service}
+              onChange={(e) => setInvoiceDetails({...invoiceDetails, service: e.target.value})}
+            />
           </div>
         </CardContent>
       </Card>
@@ -392,9 +477,37 @@ const DynamicInvoiceGenerator = () => {
       <Card className="shadow-soft">
         <CardContent className="p-8">
           <div ref={printRef}>
-            <div className="text-center mb-6">
-              <h1 className="text-xl font-bold">INVOICE - {selectedContractType.toUpperCase()}</h1>
-              <h2 className="text-lg font-semibold mt-2">TAHIRA CONSTRUCTION & SERVICES</h2>
+            {/* Header */}
+            <div className="header">
+              <h1>TAHIRA CONSTRUCTION & SERVICES</h1>
+              <p className="text-xs">VPO Makori Tehsil Banda Daud Shah District Karak</p>
+              <p className="text-xs">Email: mshamidkhattak@gmail.com | Contact: 03155157591</p>
+            </div>
+
+            {/* Bill To Section */}
+            <div className="bill-to">
+              <p className="font-bold mb-2">Bill To:</p>
+              <p><strong>Chief Finance Officer</strong></p>
+              <p>Mol Pakistan Oil & Gas Co. B.V.</p>
+              <p>Islamabad Stock Exchange Towers, Floor No. 18,</p>
+              <p>55-Jinnah Avenue, Islamabad, Pakistan 4400.</p>
+              <p>NTN # 1938929-9</p>
+              <p>STRN: 701270001264</p>
+            </div>
+
+            {/* Invoice Details */}
+            <div className="invoice-details text-sm">
+              <div>
+                <p><strong>Date:</strong> {format(invoiceDetails.date, "dd-MM-yyyy")}</p>
+                <p><strong>Contract #:</strong> {invoiceDetails.contractNumber}</p>
+                <p><strong>NTN #:</strong> {invoiceDetails.ntn}</p>
+                <p><strong>KPK GST #:</strong> {invoiceDetails.kpkGst}</p>
+              </div>
+              <div className="text-right">
+                <p><strong>Invoice For Month:</strong> {invoiceDetails.month} {invoiceDetails.year}</p>
+                <p><strong>Service:</strong> {invoiceDetails.service}</p>
+                <p><strong>Contract Type:</strong> {selectedContractType}</p>
+              </div>
             </div>
 
             <Table className="mb-6">
@@ -454,6 +567,13 @@ const DynamicInvoiceGenerator = () => {
                 </TableRow>
               </TableBody>
             </Table>
+
+            {/* Footer */}
+            <div className="footer">
+              <p><strong>TAHIRA CONSTRUCTION & SERVICES</strong></p>
+              <p>Address: VPO Makori Tehsil Banda Daud Shah District Karak</p>
+              <p>Email: mshamidkhattak@gmail.com | Contact No: 03155157591</p>
+            </div>
           </div>
         </CardContent>
       </Card>

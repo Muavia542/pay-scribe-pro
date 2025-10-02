@@ -40,7 +40,7 @@ const Layout = ({ children }: LayoutProps) => {
         <p className="text-sm text-muted-foreground mt-1">Construction Services</p>
       </div>
       
-      <nav className="px-4 pb-4 flex-1">
+      <nav className="px-4 pb-4 flex-1 overflow-y-auto">
         {navigation.map((item) => {
           const Icon = item.icon;
           const isActive = location.pathname === item.href;
@@ -101,7 +101,7 @@ const Layout = ({ children }: LayoutProps) => {
               className="fixed inset-0 bg-black/50 z-40"
               onClick={() => setSidebarOpen(false)}
             />
-            <div className="fixed top-16 left-0 w-64 h-[calc(100vh-4rem)] bg-card shadow-xl border-r border-border z-50">
+            <div className="fixed top-16 left-0 w-64 h-[calc(100vh-4rem)] bg-card shadow-xl border-r border-border z-50 flex flex-col overflow-hidden">
               <NavigationContent />
             </div>
           </>

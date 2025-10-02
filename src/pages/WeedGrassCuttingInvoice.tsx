@@ -22,7 +22,12 @@ const WeedGrassCuttingInvoice = () => {
   const [invoiceData, setInvoiceData] = useState({
     invoiceNumber: "TCS-WGC-001",
     date: new Date(),
-    contractNumber: "WGC-CON001/25",
+    contractNumber: "CON1467/25",
+    ntn: "5194834-7",
+    kpkGst: "K-5194834-7",
+    month: "October",
+    year: "2025",
+    service: "Provision of Support Services at Loading Operation-1",
     projectTitle: "CUTTING WILD GRASS AND WEED REMOVAL AT KARAK BLOCK LOCATIONS FOR 3 YEARS",
     round: "Round-1"
   });
@@ -88,16 +93,19 @@ const WeedGrassCuttingInvoice = () => {
             <head>
               <title>Weed & Grass Cutting Invoice - ${invoiceData.invoiceNumber}</title>
               <style>
-                body { font-family: Arial, sans-serif; margin: 20px; font-size: 12px; }
-                .invoice-header { text-align: center; margin-bottom: 20px; }
-                .invoice-title { font-size: 16px; font-weight: bold; margin-bottom: 5px; }
-                .project-title { font-size: 14px; margin-bottom: 10px; }
-                table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
+                body { font-family: Arial, sans-serif; margin: 20px; font-size: 11px; }
+                .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #000; padding-bottom: 10px; }
+                .header h1 { font-size: 18px; font-weight: bold; margin: 5px 0; color: #0066cc; }
+                .bill-to { margin: 20px 0; }
+                .bill-to p { margin: 2px 0; }
+                .invoice-details { display: flex; justify-content: space-between; margin: 20px 0; }
+                .invoice-details div { flex: 1; }
+                table { width: 100%; border-collapse: collapse; margin: 15px 0; }
                 th, td { border: 1px solid #000; padding: 8px; text-align: left; }
-                th { background-color: #f5f5f5; font-weight: bold; }
+                th { background-color: #f0f0f0; font-weight: bold; }
                 .amount { text-align: right; }
-                .total-row { font-weight: bold; }
-                .final-total { font-size: 14px; font-weight: bold; }
+                .total-row { font-weight: bold; background-color: #f9f9f9; }
+                .footer { text-align: center; margin-top: 30px; border-top: 2px solid #000; padding-top: 10px; font-size: 10px; }
                 @media print {
                   body { margin: 0; }
                   @page { size: A4; margin: 0.5in; }
@@ -137,7 +145,7 @@ const WeedGrassCuttingInvoice = () => {
           <CardTitle>Invoice Configuration</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-3 gap-4">
             <div>
               <Label htmlFor="round">Round</Label>
               <Select value={invoiceData.round} onValueChange={(value) => setInvoiceData({...invoiceData, round: value})}>
@@ -161,9 +169,6 @@ const WeedGrassCuttingInvoice = () => {
                 onChange={(e) => setInvoiceData({...invoiceData, invoiceNumber: e.target.value})}
               />
             </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
             <div>
               <Label htmlFor="date">Date</Label>
               <DatePicker
@@ -172,12 +177,63 @@ const WeedGrassCuttingInvoice = () => {
                 placeholder="Select date"
               />
             </div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-4">
             <div>
-              <Label htmlFor="contractNumber">Contract Number</Label>
+              <Label htmlFor="contractNumber">Contract #</Label>
               <Input
                 id="contractNumber"
                 value={invoiceData.contractNumber}
                 onChange={(e) => setInvoiceData({...invoiceData, contractNumber: e.target.value})}
+              />
+            </div>
+            <div>
+              <Label htmlFor="ntn">NTN #</Label>
+              <Input
+                id="ntn"
+                value={invoiceData.ntn}
+                onChange={(e) => setInvoiceData({...invoiceData, ntn: e.target.value})}
+              />
+            </div>
+            <div>
+              <Label htmlFor="kpkGst">KPK GST #</Label>
+              <Input
+                id="kpkGst"
+                value={invoiceData.kpkGst}
+                onChange={(e) => setInvoiceData({...invoiceData, kpkGst: e.target.value})}
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-4">
+            <div>
+              <Label htmlFor="month">Invoice For Month</Label>
+              <Select value={invoiceData.month} onValueChange={(value) => setInvoiceData({...invoiceData, month: value})}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select month" />
+                </SelectTrigger>
+                <SelectContent>
+                  {["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"].map(m => (
+                    <SelectItem key={m} value={m}>{m}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="year">Year</Label>
+              <Input
+                id="year"
+                value={invoiceData.year}
+                onChange={(e) => setInvoiceData({...invoiceData, year: e.target.value})}
+              />
+            </div>
+            <div>
+              <Label htmlFor="service">Service</Label>
+              <Input
+                id="service"
+                value={invoiceData.service}
+                onChange={(e) => setInvoiceData({...invoiceData, service: e.target.value})}
               />
             </div>
           </div>
@@ -290,10 +346,41 @@ const WeedGrassCuttingInvoice = () => {
       <Card className="shadow-soft">
         <CardContent className="p-8">
           <div ref={printRef}>
-            {/* Invoice Header */}
-            <div className="text-center mb-6">
-              <h1 className="text-xl font-bold">INVOICE FOR {invoiceData.round.toUpperCase()}</h1>
-              <h2 className="text-lg font-semibold mt-2">{invoiceData.projectTitle}</h2>
+            {/* Header */}
+            <div className="header">
+              <h1>TAHIRA CONSTRUCTION & SERVICES</h1>
+              <p className="text-xs">VPO Makori Tehsil Banda Daud Shah District Karak</p>
+              <p className="text-xs">Email: mshamidkhattak@gmail.com | Contact: 03155157591</p>
+            </div>
+
+            {/* Bill To Section */}
+            <div className="bill-to">
+              <p className="font-bold mb-2">Bill To:</p>
+              <p><strong>Chief Finance Officer</strong></p>
+              <p>Mol Pakistan Oil & Gas Co. B.V.</p>
+              <p>Islamabad Stock Exchange Towers, Floor No. 18,</p>
+              <p>55-Jinnah Avenue, Islamabad, Pakistan 4400.</p>
+              <p>NTN # 1938929-9</p>
+              <p>STRN: 701270001264</p>
+            </div>
+
+            {/* Invoice Details */}
+            <div className="invoice-details text-sm">
+              <div>
+                <p><strong>Date:</strong> {format(invoiceData.date, "dd-MM-yyyy")}</p>
+                <p><strong>Contract #:</strong> {invoiceData.contractNumber}</p>
+                <p><strong>NTN #:</strong> {invoiceData.ntn}</p>
+                <p><strong>KPK GST #:</strong> {invoiceData.kpkGst}</p>
+              </div>
+              <div className="text-right">
+                <p><strong>Invoice For Month:</strong> {invoiceData.month} {invoiceData.year}</p>
+                <p><strong>Service:</strong> {invoiceData.service}</p>
+                <p><strong>Round:</strong> {invoiceData.round}</p>
+              </div>
+            </div>
+
+            <div className="text-center mb-4">
+              <h2 className="text-base font-bold">{invoiceData.projectTitle}</h2>
             </div>
 
             {/* Invoice Table */}
@@ -335,6 +422,13 @@ const WeedGrassCuttingInvoice = () => {
                 </TableRow>
               </TableBody>
             </Table>
+
+            {/* Footer */}
+            <div className="footer">
+              <p><strong>TAHIRA CONSTRUCTION & SERVICES</strong></p>
+              <p>Address: VPO Makori Tehsil Banda Daud Shah District Karak</p>
+              <p>Email: mshamidkhattak@gmail.com | Contact No: 03155157591</p>
+            </div>
           </div>
         </CardContent>
       </Card>
