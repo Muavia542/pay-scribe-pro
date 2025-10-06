@@ -209,8 +209,8 @@ const Attendance = () => {
           <CardTitle className="text-2xl font-bold text-center">
             TAHIRA CONSTRUCTION & SERVICES - Process & Inspection Loadi
           </CardTitle>
-          <div className="text-xl font-semibold text-center mt-2">
-            Attendance Sheet: {format(selectedDate, 'MMM - yyyy')}
+          <div className="text-xl font-semibold text-center mt-6">
+            Attendance Sheet: {format(selectedDate, 'MMMM yyyy')}
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
