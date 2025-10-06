@@ -7,8 +7,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DatePicker } from "@/components/ui/date-picker";
 import { useToast } from "@/hooks/use-toast";
-import { Printer, Plus, Trash2, Edit2, Save, X } from "lucide-react";
+import { Printer, Plus, Trash2, Edit2, Save, X, Download } from "lucide-react";
 import { format } from "date-fns";
+import { generateDynamicInvoicePDF } from "@/utils/dynamicInvoicePDFGenerator";
 
 interface DynamicField {
   id: string;
@@ -176,6 +177,45 @@ const DynamicInvoiceGenerator = () => {
 
   const { lineItemsTotal, localMgmtAmount, subTotal, gstAmount, totalAmount } = calculateTotals();
 
+  const handleDownloadPDF = () => {
+    if (!selectedContractType) {
+      toast({
+        title: "Error",
+        description: "Please select a contract type first",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      generateDynamicInvoicePDF({
+        contractType: selectedContractType,
+        date: invoiceDetails.date,
+        contractNumber: invoiceDetails.contractNumber,
+        ntn: invoiceDetails.ntn,
+        kpkGst: invoiceDetails.kpkGst,
+        month: invoiceDetails.month,
+        year: invoiceDetails.year,
+        service: invoiceDetails.service,
+        dynamicFields: dynamicFields,
+        lineItems: lineItems,
+        localManagementRate: localManagement.rate,
+        gstRate: gstRate
+      });
+
+      toast({
+        title: "Success",
+        description: "PDF downloaded successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to generate PDF",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handlePrint = () => {
     if (printRef.current) {
       const printWindow = window.open('', '_blank');
@@ -227,6 +267,10 @@ const DynamicInvoiceGenerator = () => {
           <Button variant="outline" onClick={() => setIsEditingFields(!isEditingFields)}>
             <Edit2 className="w-4 h-4 mr-2" />
             {isEditingFields ? "Done Editing" : "Edit Fields"}
+          </Button>
+          <Button onClick={handleDownloadPDF}>
+            <Download className="w-4 h-4 mr-2" />
+            Download PDF
           </Button>
           <Button variant="outline" onClick={handlePrint}>
             <Printer className="w-4 h-4 mr-2" />

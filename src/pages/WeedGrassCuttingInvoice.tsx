@@ -7,8 +7,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DatePicker } from "@/components/ui/date-picker";
 import { useToast } from "@/hooks/use-toast";
-import { Printer, FileText, Plus, Trash2 } from "lucide-react";
+import { Printer, FileText, Plus, Trash2, Download } from "lucide-react";
 import { format } from "date-fns";
+import { generateWeedCuttingPDF } from "@/utils/weedCuttingPDFGenerator";
 
 interface LineItem {
   id: string;
@@ -84,6 +85,37 @@ const WeedGrassCuttingInvoice = () => {
     setLineItems(items => items.filter(item => item.id !== id));
   };
 
+  const handleDownloadPDF = () => {
+    try {
+      generateWeedCuttingPDF({
+        invoiceNumber: invoiceData.invoiceNumber,
+        date: invoiceData.date,
+        contractNumber: invoiceData.contractNumber,
+        ntn: invoiceData.ntn,
+        kpkGst: invoiceData.kpkGst,
+        month: invoiceData.month,
+        year: invoiceData.year,
+        service: invoiceData.service,
+        projectTitle: invoiceData.projectTitle,
+        round: invoiceData.round,
+        lineItems: lineItems,
+        localManagement: localManagement,
+        gstRate: gstRate
+      });
+      
+      toast({
+        title: "Success",
+        description: "PDF downloaded successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to generate PDF",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handlePrint = () => {
     if (printRef.current) {
       const printWindow = window.open('', '_blank');
@@ -132,6 +164,10 @@ const WeedGrassCuttingInvoice = () => {
           <p className="text-muted-foreground mt-1">Generate invoices for weed and grass cutting projects</p>
         </div>
         <div className="flex gap-2">
+          <Button onClick={handleDownloadPDF}>
+            <Download className="w-4 h-4 mr-2" />
+            Download PDF
+          </Button>
           <Button variant="outline" onClick={handlePrint}>
             <Printer className="w-4 h-4 mr-2" />
             Print

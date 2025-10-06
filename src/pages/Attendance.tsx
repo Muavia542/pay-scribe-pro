@@ -102,14 +102,14 @@ const Attendance = () => {
       let presentDays = 0;
       
       for (let day = 1; day <= daysInMonth; day++) {
-        // Check if the day is Sunday (0)
+        // Check if the day is Saturday (6) or Sunday (0)
         const date = new Date(year, month, day);
         const dayOfWeek = date.getDay();
-        const isSunday = dayOfWeek === 0;
+        const isWeekend = dayOfWeek === 0 || dayOfWeek === 6; // Sunday or Saturday
         
-        // Default Sunday to Absent, other days to Present
-        dailyAttendance[day] = isSunday ? 'A' : 'P';
-        if (!isSunday) presentDays++;
+        // Default weekends to Absent, other days to Present
+        dailyAttendance[day] = isWeekend ? 'A' : 'P';
+        if (!isWeekend) presentDays++;
       }
       
       return {

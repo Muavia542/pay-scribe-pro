@@ -311,6 +311,31 @@ const Employees = () => {
     setIsColumnSelectOpen(false);
   };
 
+  const handleUpdateWorkingDays = async (id: string, newWorkingDays: number) => {
+    try {
+      const { error } = await supabase
+        .from('employees')
+        .update({ working_days: newWorkingDays })
+        .eq('id', id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Working days updated successfully",
+      });
+
+      fetchEmployees();
+    } catch (error: any) {
+      console.error('Error updating working days:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update working days",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleSortByDepartmentName = () => {
     // This function is called when the sort button is clicked
     // It will sort by department first, then by name within each department
@@ -720,19 +745,7 @@ const Employees = () => {
                     )}
                   </Button>
                 </TableHead>
-                <TableHead>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    onClick={() => handleSort('workingDays')}
-                    className="h-auto p-0 font-medium hover:bg-transparent"
-                  >
-                    Working Days
-                    {sortBy === 'workingDays' && (
-                      sortOrder === 'asc' ? <ChevronUp className="ml-1 w-4 h-4" /> : <ChevronDown className="ml-1 w-4 h-4" />
-                    )}
-                  </Button>
-                </TableHead>
+                <TableHead>Working Days</TableHead>
                 <TableHead>Total Salary</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
@@ -758,7 +771,35 @@ const Employees = () => {
                     <TableCell>{employee.department}</TableCell>
                     <TableCell>{employee.category}</TableCell>
                     <TableCell>{employee.basicSalary.toLocaleString()}</TableCell>
-                    <TableCell>{employee.workingDays}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2 justify-center">
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={() => {
+                            const current = employee.workingDays || 0;
+                            if (current > 0) {
+                              handleUpdateWorkingDays(employee.id, current - 1);
+                            }
+                          }}
+                        >
+                          -
+                        </Button>
+                        <span className="min-w-[2rem] text-center font-medium">{employee.workingDays}</span>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={() => {
+                            const current = employee.workingDays || 0;
+                            handleUpdateWorkingDays(employee.id, current + 1);
+                          }}
+                        >
+                          +
+                        </Button>
+                      </div>
+                    </TableCell>
                     <TableCell>{employee.calculatedSalary?.toLocaleString()}</TableCell>
                     <TableCell>
                       <div className="flex gap-2">
