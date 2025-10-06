@@ -10,11 +10,11 @@ import { Badge } from "@/components/ui/badge";
 import { DatePicker } from "@/components/ui/date-picker";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Printer, FileText, Eye, Trash2, Plus } from "lucide-react";
+import { Printer, FileText, Eye, Trash2, Plus, Download } from "lucide-react";
 import { Link } from "react-router-dom";
 import { roundInvoiceAmount } from "@/utils/pdfGenerator";
 import { format } from "date-fns";
-// Removed missing logo import; using public asset path
+import { generateKPKInvoicePDF } from "@/utils/kpkInvoicePDFGenerator";
 
 const KPKInvoice = () => {
   const [invoiceData, setInvoiceData] = useState({
@@ -198,6 +198,40 @@ const KPKInvoice = () => {
     }
   };
 
+  const handleDownloadPDF = () => {
+    try {
+      generateKPKInvoicePDF({
+        invoiceNumber: invoiceData.invoiceNumber,
+        date: invoiceData.date,
+        contractNumber: invoiceData.contractNumber,
+        ntn: invoiceData.ntn,
+        kpkGst: invoiceData.kpkGST,
+        month: format(invoiceData.month, 'MMMM'),
+        year: invoiceData.month.getFullYear().toString(),
+        service: invoiceData.service,
+        department: invoiceData.department,
+        lineItems: lineItems,
+        eobi: eobi,
+        subTotal: subTotal,
+        totalWithEobi: totalWithEobi,
+        gstRate: gstRate,
+        gstAmount: gstAmount,
+        finalTotal: finalTotal
+      });
+
+      toast({
+        title: "Success",
+        description: "PDF downloaded successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to generate PDF",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -218,6 +252,10 @@ const KPKInvoice = () => {
               <FileText className="w-4 h-4 mr-2" />
               Weed Cutting
             </Link>
+          </Button>
+          <Button onClick={handleDownloadPDF}>
+            <Download className="w-4 h-4 mr-2" />
+            Download PDF
           </Button>
           <Button variant="outline" onClick={handlePrint}>
             <Printer className="w-4 h-4 mr-2" />
