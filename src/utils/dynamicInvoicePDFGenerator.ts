@@ -1,5 +1,3 @@
-import jsPDF from 'jsp
-import { addInvoiceHeader, addInvoiceFooter, InvoiceHeaderData } from './invoicePDFGenerator';
 import jsPDF from 'jspdf';
 import { addInvoiceHeader, addInvoiceFooter, InvoiceHeaderData } from './invoicePDFGenerator';
 
@@ -62,7 +60,7 @@ export const generateDynamicInvoicePDF = (data: DynamicInvoiceData) => {
   const colWidth = (pageWidth - 30) / numCols;
 
   let xPos = 15;
-  pdf.setFillColor(220, 220, 220); // darker gray header
+  pdf.setFillColor(220, 220, 220); // light gray header
   pdf.setTextColor(0, 0, 0);
 
   tableHeaders.forEach(header => {
@@ -134,16 +132,17 @@ export const generateDynamicInvoicePDF = (data: DynamicInvoiceData) => {
   pdf.text(`Add KPK GST @${data.gstRate}%:`, 15, yPosition);
   pdf.text(`PKR ${gstAmount.toLocaleString()}`, pageWidth - 15, yPosition, { align: 'right' });
 
-  // TOTAL AMOUNT Section (No Background)
-  yPosition += 10;
-  pdf.setFontSize(12);
+  // ✅ TOTAL AMOUNT SECTION (No fill, no rectangle)
+  yPosition += 12;
   pdf.setFont('helvetica', 'bold');
+  pdf.setFontSize(12);
   pdf.setTextColor(0, 0, 0);
-  pdf.text('TOTAL AMOUNT (PKR):', 20, yPosition + 7);
-  pdf.text(`PKR ${totalAmount.toLocaleString()}`, pageWidth - 20, yPosition + 7, { align: 'right' });
+  pdf.text('TOTAL AMOUNT (PKR):', 15, yPosition);
+  pdf.text(`PKR ${totalAmount.toLocaleString()}`, pageWidth - 15, yPosition, { align: 'right' });
 
   // Add footer
   addInvoiceFooter(pdf);
 
   pdf.save(`${data.contractType}-Invoice.pdf`);
 };
+
