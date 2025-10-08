@@ -51,14 +51,14 @@ export const generateWeedCuttingPDF = (data: WeedCuttingInvoiceData) => {
   pdf.setFontSize(10);
   pdf.setFont('helvetica', 'bold');
   pdf.setFillColor(240, 240, 240);
+  pdf.setTextColor(0, 0, 0);
   
   const tableHeaders = ['Description', 'Qty', 'Rate (PKR)', 'Amount (PKR)'];
   const colWidths = [100, 20, 30, 35];
   let xPos = 15;
   
   tableHeaders.forEach((header, i) => {
-    pdf.rect(xPos, yPosition, colWidths[i], 8, 'F');
-    pdf.rect(xPos, yPosition, colWidths[i], 8);
+    pdf.rect(xPos, yPosition, colWidths[i], 8, 'FD');
     pdf.text(header, xPos + 2, yPosition + 5.5);
     xPos += colWidths[i];
   });

@@ -55,6 +55,7 @@ export const generateDynamicInvoicePDF = (data: DynamicInvoiceData) => {
   pdf.setFontSize(10);
   pdf.setFont('helvetica', 'bold');
   pdf.setFillColor(240, 240, 240);
+  pdf.setTextColor(0, 0, 0);
   
   const tableHeaders = data.dynamicFields.map(f => f.label);
   const numCols = tableHeaders.length;
@@ -62,8 +63,7 @@ export const generateDynamicInvoicePDF = (data: DynamicInvoiceData) => {
   
   let xPos = 15;
   tableHeaders.forEach(header => {
-    pdf.rect(xPos, yPosition, colWidth, 8, 'F');
-    pdf.rect(xPos, yPosition, colWidth, 8);
+    pdf.rect(xPos, yPosition, colWidth, 8, 'FD');
     const truncated = header.length > 15 ? header.substring(0, 13) + '...' : header;
     pdf.text(truncated, xPos + 2, yPosition + 5.5);
     xPos += colWidth;

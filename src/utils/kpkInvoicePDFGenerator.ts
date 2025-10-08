@@ -55,14 +55,14 @@ export const generateKPKInvoicePDF = (data: KPKInvoiceData) => {
   pdf.setFontSize(10);
   pdf.setFont('helvetica', 'bold');
   pdf.setFillColor(240, 240, 240);
+  pdf.setTextColor(0, 0, 0);
   
   const tableHeaders = ['Description/Location', 'Rate', 'Attendance', 'POB', 'Amount'];
   const colWidths = [70, 25, 25, 20, 35];
   let xPos = 15;
   
   tableHeaders.forEach((header, i) => {
-    pdf.rect(xPos, yPosition, colWidths[i], 8, 'F');
-    pdf.rect(xPos, yPosition, colWidths[i], 8);
+    pdf.rect(xPos, yPosition, colWidths[i], 8, 'FD');
     pdf.text(header, xPos + 2, yPosition + 5.5);
     xPos += colWidths[i];
   });
