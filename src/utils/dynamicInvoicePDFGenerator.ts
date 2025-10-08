@@ -1,3 +1,5 @@
+import jsPDF from 'jsp
+import { addInvoiceHeader, addInvoiceFooter, InvoiceHeaderData } from './invoicePDFGenerator';
 import jsPDF from 'jspdf';
 import { addInvoiceHeader, addInvoiceFooter, InvoiceHeaderData } from './invoicePDFGenerator';
 
@@ -132,13 +134,11 @@ export const generateDynamicInvoicePDF = (data: DynamicInvoiceData) => {
   pdf.text(`Add KPK GST @${data.gstRate}%:`, 15, yPosition);
   pdf.text(`PKR ${gstAmount.toLocaleString()}`, pageWidth - 15, yPosition, { align: 'right' });
 
-  // TOTAL AMOUNT Section (Highlighted Box)
+  // TOTAL AMOUNT Section (No Background)
   yPosition += 10;
-  const boxHeight = 10;
-  pdf.setFillColor(240, 240, 240);
-  pdf.rect(15, yPosition, pageWidth - 30, boxHeight, 'F');
   pdf.setFontSize(12);
   pdf.setFont('helvetica', 'bold');
+  pdf.setTextColor(0, 0, 0);
   pdf.text('TOTAL AMOUNT (PKR):', 20, yPosition + 7);
   pdf.text(`PKR ${totalAmount.toLocaleString()}`, pageWidth - 20, yPosition + 7, { align: 'right' });
 
