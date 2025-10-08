@@ -50,14 +50,14 @@ export const generateWeedCuttingPDF = (data: WeedCuttingInvoiceData) => {
   // Line items table
   pdf.setFontSize(10);
   pdf.setFont('helvetica', 'bold');
-  pdf.setFillColor(240, 240, 240);
-  pdf.setTextColor(0, 0, 0);
   
   const tableHeaders = ['Description', 'Qty', 'Rate (PKR)', 'Amount (PKR)'];
   const colWidths = [100, 20, 30, 35];
   let xPos = 15;
   
   tableHeaders.forEach((header, i) => {
+    pdf.setFillColor(240, 240, 240);
+    pdf.setTextColor(0, 0, 0);
     pdf.rect(xPos, yPosition, colWidths[i], 8, 'FD');
     pdf.text(header, xPos + 2, yPosition + 5.5);
     xPos += colWidths[i];
@@ -114,21 +114,24 @@ export const generateWeedCuttingPDF = (data: WeedCuttingInvoiceData) => {
   const gstAmount = (subTotal * data.gstRate) / 100;
   const totalAmount = subTotal + gstAmount;
   
-  yPosition += 5;
+  yPosition += 10;
   pdf.setFont('helvetica', 'bold');
+  pdf.setFontSize(10);
   
-  const totalsX = pageWidth - 70;
-  pdf.text('Sub Total:', totalsX, yPosition);
-  pdf.text(`PKR ${subTotal.toLocaleString()}`, totalsX + 35, yPosition);
+  const totalsLabelX = 15;
+  const totalsValueX = pageWidth - 50;
+  
+  pdf.text('Sub Total:', totalsLabelX, yPosition);
+  pdf.text(`PKR ${subTotal.toLocaleString()}`, totalsValueX, yPosition, { align: 'right' });
   yPosition += 6;
   
-  pdf.text(`GST (${data.gstRate}%):`, totalsX, yPosition);
-  pdf.text(`PKR ${gstAmount.toLocaleString()}`, totalsX + 35, yPosition);
+  pdf.text(`GST (${data.gstRate}%):`, totalsLabelX, yPosition);
+  pdf.text(`PKR ${gstAmount.toLocaleString()}`, totalsValueX, yPosition, { align: 'right' });
   yPosition += 6;
   
   pdf.setFontSize(12);
-  pdf.text('Total Amount:', totalsX, yPosition);
-  pdf.text(`PKR ${totalAmount.toLocaleString()}`, totalsX + 35, yPosition);
+  pdf.text('Total Amount:', totalsLabelX, yPosition);
+  pdf.text(`PKR ${totalAmount.toLocaleString()}`, totalsValueX, yPosition, { align: 'right' });
   
   // Add footer
   addInvoiceFooter(pdf);

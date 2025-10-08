@@ -54,8 +54,6 @@ export const generateDynamicInvoicePDF = (data: DynamicInvoiceData) => {
   // Dynamic table - determine columns from fields
   pdf.setFontSize(10);
   pdf.setFont('helvetica', 'bold');
-  pdf.setFillColor(240, 240, 240);
-  pdf.setTextColor(0, 0, 0);
   
   const tableHeaders = data.dynamicFields.map(f => f.label);
   const numCols = tableHeaders.length;
@@ -63,6 +61,8 @@ export const generateDynamicInvoicePDF = (data: DynamicInvoiceData) => {
   
   let xPos = 15;
   tableHeaders.forEach(header => {
+    pdf.setFillColor(240, 240, 240);
+    pdf.setTextColor(0, 0, 0);
     pdf.rect(xPos, yPosition, colWidth, 8, 'FD');
     const truncated = header.length > 15 ? header.substring(0, 13) + '...' : header;
     pdf.text(truncated, xPos + 2, yPosition + 5.5);
@@ -109,25 +109,28 @@ export const generateDynamicInvoicePDF = (data: DynamicInvoiceData) => {
   // Local Management
   yPosition += 5;
   pdf.setFont('helvetica', 'normal');
+  pdf.setFontSize(10);
   pdf.text(`Local Management Fee (${totalQty} × ${data.localManagementRate.toLocaleString()}):`, 15, yPosition);
-  pdf.text(`PKR ${localMgmtAmount.toLocaleString()}`, pageWidth - 50, yPosition);
+  pdf.text(`PKR ${localMgmtAmount.toLocaleString()}`, pageWidth - 50, yPosition, { align: 'right' });
   
   // Totals
   yPosition += 10;
   pdf.setFont('helvetica', 'bold');
   
-  const totalsX = pageWidth - 70;
-  pdf.text('Sub Total:', totalsX, yPosition);
-  pdf.text(`PKR ${subTotal.toLocaleString()}`, totalsX + 35, yPosition);
+  const totalsLabelX = 15;
+  const totalsValueX = pageWidth - 50;
+  
+  pdf.text('Sub Total:', totalsLabelX, yPosition);
+  pdf.text(`PKR ${subTotal.toLocaleString()}`, totalsValueX, yPosition, { align: 'right' });
   yPosition += 6;
   
-  pdf.text(`GST (${data.gstRate}%):`, totalsX, yPosition);
-  pdf.text(`PKR ${gstAmount.toLocaleString()}`, totalsX + 35, yPosition);
+  pdf.text(`GST (${data.gstRate}%):`, totalsLabelX, yPosition);
+  pdf.text(`PKR ${gstAmount.toLocaleString()}`, totalsValueX, yPosition, { align: 'right' });
   yPosition += 6;
   
   pdf.setFontSize(12);
-  pdf.text('Total Amount:', totalsX, yPosition);
-  pdf.text(`PKR ${totalAmount.toLocaleString()}`, totalsX + 35, yPosition);
+  pdf.text('Total Amount:', totalsLabelX, yPosition);
+  pdf.text(`PKR ${totalAmount.toLocaleString()}`, totalsValueX, yPosition, { align: 'right' });
   
   // Add footer
   addInvoiceFooter(pdf);
