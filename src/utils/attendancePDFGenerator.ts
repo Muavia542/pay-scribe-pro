@@ -27,9 +27,9 @@ export const generateAttendancePDF = (
   pdf.setTextColor(255, 255, 255); // White text
   pdf.setFontSize(16);
   pdf.setFont('helvetica', 'bold');
-  const companyName = `TAHIRA CONSTRUCTION COMPANY - Process & Inspection Loadi`;
+  const companyName = `TAHIRA CONSTRUCTION COMPANY - Process & Inspection Loading`;
   const companyNameWidth = pdf.getTextWidth(companyName);
-  pdf.text(companyName, (pageWidth - companyNameWidth) / 2, 15);
+  pdf.text(companyName, (pageWidth - companyNameWidth) / 2, 12);
   
   // Reset text color for rest of document
   pdf.setTextColor(0, 0, 0);
@@ -39,7 +39,7 @@ export const generateAttendancePDF = (
   pdf.setFont('helvetica', 'bold');
   const attendanceHeader = `Attendance Sheet: ${monthYear}`;
   const attendanceHeaderWidth = pdf.getTextWidth(attendanceHeader);
-  pdf.text(attendanceHeader, pageWidth - attendanceHeaderWidth - 10, 15);
+  pdf.text(attendanceHeader, (pageWidth - attendanceHeaderWidth) / 2, 21);
   
   // Add department name
   pdf.setFontSize(12);
